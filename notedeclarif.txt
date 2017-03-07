@@ -1,0 +1,38 @@
+Note de Clarification
+
+Donnée d'entrée : Site de NF17
+
+Contexte: Gordon Ramses, entrepreneur et possesseur de nombreux restaurants dans le monde, veut mettre en place une base de données permettant de gérer le personnel et les cartes de ses restaurants. 
+
+Objet du Projet:
+Phase de définition: Conception de la BDD (création des diagrammes de classes et MLD)
+Phase de réalisation: implémentation de la BDD, Création du site, 
+
+Produit du Projet:
+Un site web permettant d'interagir avec la BDD gérant les restaurants  de Gordon Ramsey, le personel et leurs cartes.
+Une note de clarification et un product backlog. Le MCD et MLD de la base demandée.
+
+Objectifs du projet:
+	Délai :
+    Pour le Vendredi 10 Mars: Note de clarification et product backlog
+
+   Pour le Vendredi 17 Mars: Analyse : MCD et MLD normalisés (pour l'ensemble du problème)
+
+    Pour le Vendredi 24 Mars: V1 : SQL et application (éventuellement MCD et MLD modifiés)
+
+    Pour le Vendredi 31 Mars: V2 : SQL et application (éventuellement MCD et MLD modifiés)
+
+	Cout:
+	Un Minimum de 12h de travail pour le groupe en plus du travail personnel de chacun.
+
+	Qualité:
+Un client devra pouvoir voir les différentes cartes de chaque restaurant.Un manager devra pouvoir changer les cartes, voir la liste de personnel et la mettre à jour.
+Les managers pourrons regarder diverses statistiques, comme par exemple : les plats les plus commandés, la somme en moyenne dépensé pour les desserts ...
+
+Acteur :
+Maitre d'ouvragre: Gordon Ramses
+Maitre d'oeuvre: 4 étudiants UTC de NF17: Camille DRESSE, Cédric PARIS, Nawhal SAYARH et Eva TERZAGO.
+
+Clarification du projet:
+Les managers managent qu'un seul restaurant. Les employés gardent leur occupation dans le restaurant. On n'affichera que l'ancienneté de l'occupation actuelle de l'employé. Les cartes et les menus peuvent etre communs à plusieurs restaurants. Pour se connecter le manager a juste besoin de son identifiant. Le prix des menus est fixé mais ne correspond pas a la somme des plats qui le composent. Les menus ne contiennent pas de boissons. Une carte a une période donnée.
+
