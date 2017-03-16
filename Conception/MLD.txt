@@ -1,0 +1,47 @@
+sujet mail NF17 Groupe 4
+écrire les contraintes, les clef candidates, ex un restaurant a une seule carte a la fois et les deux dates ne se chevauchent pas
+
+Tous les attributs où ce n’est pas spécifié NULLABLE sont NOT NULL.
+
+Restaurant (#idRestaurant: int, nomRestaurant: string, adresse:string, ville:string, pays:string,)
+	Contraintes: (nomRestaurant, adresse, ville, pays) clé candidate
+
+Cuisinier (#idEmploye: int, spécialité: string, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurant: int)
+	Contraintes: (nom, prénom, dateNaissance) clé candidate
+
+Manager(#idEmploye: int, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurant: int) 
+	Contraintes: (nom, prénom, dateNaissance) clé candidate
+
+Serveur(#idEmploye: int, authorisationAccueil: boolean, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurant: int) 
+	Contraintes: (nom, prénom, dateNaissance) clé candidate
+
+Carte (#idCarte: int, nomCarte: string)
+
+Commande(#idCommande: int, dateCommande: date, idRestaurant=>Restaurant: int)
+
+Menu(#idMenu :int, nomMenu: string)
+
+Element(#idElement: int, nomElement: string)
+
+Plat(#idElement=>Element: int, catégorie: string, entree: boolean, plat: boolean, dessert: boolean)
+
+Boisson(#idElement=>Element: int, type: string, anneeProduction: int)
+	Contraintes : anneeProduction NULLABLE
+
+Ingredient(#nomIngredient: string, liquide: boolean, solide: boolean)
+
+PeriodeCarte(#idCarte=>Carte: int ,#idRestaurant=>Restaurant: int ,dateDebut: date, dateFin: date)
+	Contraintes: dateDebut<dateFin, On ne peut pas modéliser cette contrainte: Un restaurant a une seule carte a la fois par période. C’est à dire que deux périodes de deux cartes différentes ne peuvent pas se chevaucher pour un même restaurant.
+
+QuantiteMenu(#idMenu=>Menu: int,#idCommande=>Commande: int,quantiteMenu :int )
+
+QuantiteElement(#idElement=>Element: int, #idCommande=>Commande: int, quantiteElement :int)
+
+PrixMenu(#idMenu=>Menu: int, #idCarte=>Carte: int,prixMenu : int)
+
+DetailsElement(#idElement=>Element int,#idCarte=>Carte: int, prixElement: int, volumeElement: int)
+	Contraintes : volumeElement NULLABLE
+
+AssocMenuPlat(#idMenu=>Menu: int,#idElement=>Plat: int)
+
+QuantiteIngredient(#nomIngredient=>Ingredient :string,#idElement=>Plat :int, quantiteIngredient: int)
