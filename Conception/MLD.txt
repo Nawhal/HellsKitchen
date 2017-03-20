@@ -17,31 +17,35 @@ Serveur(#idEmploye: int, authorisationAccueil: boolean, nom: string, prénom: str
 
 Carte (#idCarte: int, nomCarte: string)
 
-Commande(#idCommande: int, dateCommande: date, idRestaurant=>Restaurant: int)
+Commande(#idCommande: int, #idRestaurant=>Restaurant: int, dateCommande: date)
 
-Menu(#idMenu :int, nomMenu: string)
+Menu(#idElement=>Element :int, nomMenu: string)
 
-Element(#idElement: int, nomElement: string)
+Element(#idElement: int)
 
-Plat(#idElement=>Element: int, catégorie: string, entree: boolean, plat: boolean, dessert: boolean)
+Plat(#idElement=>Element: int, nomPlat: string, catégorie: string, entree: boolean, plat: boolean, dessert: boolean)
 
-Boisson(#idElement=>Element: int, type: string, anneeProduction: int)
-	Contraintes : anneeProduction NULLABLE
+BoissonOfferte(#idElement=>Element: int, nomBoisson=>Boisson: string, volumeDecilitres: decimal, anneeProduction: int)
+	Contraintes :
+	- anneeProduction NULLABLE
+	- volumeDecilitres > 0
+
+Boisson(#nomBoisson: string, type: string)
 
 Ingredient(#nomIngredient: string, liquide: boolean, solide: boolean)
 
-PeriodeCarte(#idCarte=>Carte: int ,#idRestaurant=>Restaurant: int ,dateDebut: date, dateFin: date)
-	Contraintes: dateDebut<dateFin, On ne peut pas modéliser cette contrainte: Un restaurant a une seule carte a la fois par période. C’est à dire que deux périodes de deux cartes différentes ne peuvent pas se chevaucher pour un même restaurant.
+PeriodeCarte(#idCarte=>Carte: int, #idRestaurant=>Restaurant: int, #dateDebut: date, dateFin: date)
+	Contraintes:
+	- dateDebut < dateFin
+	- On ne peut pas modéliser la contrainte suivante: Un restaurant a une seule carte a la fois par période. C’est à dire que deux périodes de deux cartes différentes ne peuvent pas se chevaucher pour un même restaurant.
 
-QuantiteMenu(#idMenu=>Menu: int,#idCommande=>Commande: int,quantiteMenu :int )
+QuantiteElement(#idElement=>Element: int, #idCarte=>Carte: int, quantiteElement :int)
+	Contraintes: quantiteElement > 0
 
-QuantiteElement(#idElement=>Element: int, #idCommande=>Commande: int, quantiteElement :int)
+PrixElement(#idElement=>Element int, #idCarte=>Carte: int, prixElement: decimal)
+	Contraintes: prixElement > 0
 
-PrixMenu(#idMenu=>Menu: int, #idCarte=>Carte: int,prixMenu : int)
+AssocMenuPlat(#idMenu=>Menu: int,#idPlat=>Plat: int)
 
-DetailsElement(#idElement=>Element int,#idCarte=>Carte: int, prixElement: int, volumeElement: int)
-	Contraintes : volumeElement NULLABLE
-
-AssocMenuPlat(#idMenu=>Menu: int,#idElement=>Plat: int)
-
-QuantiteIngredient(#nomIngredient=>Ingredient :string,#idElement=>Plat :int, quantiteIngredient: int)
+QuantiteIngredient(#nomIngredient=>Ingredient: string, #idElement=>Plat :int, quantiteIngredient: int)
+	Contraintes: quantiteIngredient > 0
