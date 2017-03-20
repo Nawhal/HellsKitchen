@@ -1,0 +1,17 @@
+DROP TABLE Manager;
+DROP TABLE Serveur;
+DROP TABLE Cuisinier;
+DROP TABLE PeriodeCarte;
+DROP TABLE PrixElement;
+DROP TABLE QuantiteElement;
+DROP TABLE BoissonOfferte;
+DROP TABLE AssocMenuPlat;
+DROP TABLE Menu;
+DROP TABLE QuantiteIngredient;
+DROP TABLE Ingredient;
+DROP TABLE Plat;
+DROP TABLE Commande;
+DROP TABLE Boisson;
+DROP TABLE Carte;
+DROP TABLE Element;
+DROP TABLE Restaurant;
