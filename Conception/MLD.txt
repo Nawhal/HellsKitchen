@@ -3,49 +3,50 @@ sujet mail NF17 Groupe 4
 
 Tous les attributs où ce n’est pas spécifié NULLABLE sont NOT NULL.
 
-Restaurant (#idRestaurant: int, nomRestaurant: string, adresse:string, ville:string, pays:string,)
+Restaurants (#idRestaurant: int, nomRestaurant: string, adresse:string, ville:string, pays:string,)
 	Contraintes: (nomRestaurant, adresse, ville, pays) clé candidate
 
-Cuisinier (#idEmploye: int, spécialité: string, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurant: int)
+Cuisiniers (#idEmploye: int, spécialité: string, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurants: int)
 	Contraintes: (nom, prénom, dateNaissance) clé candidate
 
-Manager(#idEmploye: int, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurant: int) 
+Managers (#idEmploye: int, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurants: int) 
 	Contraintes: (nom, prénom, dateNaissance) clé candidate
 
-Serveur(#idEmploye: int, authorisationAccueil: boolean, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurant: int) 
+Serveurs (#idEmploye: int, authorisationAccueil: boolean, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurants: int) 
 	Contraintes: (nom, prénom, dateNaissance) clé candidate
 
-Carte (#idCarte: int, nomCarte: string)
+Cartes (#idCarte: int, nomCarte: string)
 
-Commande(#idCommande: int, #idRestaurant=>Restaurant: int, dateCommande: date)
+Commandes (#idCommande: int, #idRestaurant=>Restaurants: int, dateCommande: date)
 
-Menu(#idElement=>Element :int, nomMenu: string)
+Menus (#idElement=>Elements:int, nomMenu: string)
 
-Element(#idElement: int)
+Elements (#idElement: int)
 
-Plat(#idElement=>Element: int, nomPlat: string, catégorie: string, entree: boolean, plat: boolean, dessert: boolean)
+Plats (#idElement=>Elements: int, nomPlat: string, catégorie: string, entree: boolean, plat: boolean, dessert: boolean)
 
-BoissonOfferte(#idElement=>Element: int, nomBoisson=>Boisson: string, volumeDecilitres: decimal, anneeProduction: int)
+BoissonsOffertes (#idElement=>Elements: int, nomBoisson=>Boissons: string, volumeDecilitres: decimal, anneeProduction: int)
 	Contraintes :
 	- anneeProduction NULLABLE
 	- volumeDecilitres > 0
 
-Boisson(#nomBoisson: string, type: string)
+Boissons (#nomBoisson: string, type: string)
 
-Ingredient(#nomIngredient: string, liquide: boolean, solide: boolean)
+Ingredients (#nomIngredient: string, liquide: boolean, solide: boolean)
+	Contraintes: liquide =/= solide, un ingrédient ne peut être liquide et solide en même temps.
 
-PeriodeCarte(#idCarte=>Carte: int, #idRestaurant=>Restaurant: int, #dateDebut: date, dateFin: date)
+PeriodesCartes (#idCarte=>Cartes: int, #idRestaurant=>Restaurants: int, #dateDebut: date, dateFin: date)
 	Contraintes:
 	- dateDebut < dateFin
 	- On ne peut pas modéliser la contrainte suivante: Un restaurant a une seule carte a la fois par période. C’est à dire que deux périodes de deux cartes différentes ne peuvent pas se chevaucher pour un même restaurant.
 
-QuantiteElement(#idElement=>Element: int, #idCarte=>Carte: int, quantiteElement :int)
+QuantitesElements (#idElement=>Elements: int, #idCarte=>Cartes: int, quantiteElement :int)
 	Contraintes: quantiteElement > 0
 
-PrixElement(#idElement=>Element int, #idCarte=>Carte: int, prixElement: decimal)
+PrixElements (#idElement=>Elements: int, #idCarte=>Cartes: int, prixElement: decimal)
 	Contraintes: prixElement > 0
 
-AssocMenuPlat(#idMenu=>Menu: int,#idPlat=>Plat: int)
+AssocMenusPlats (#idMenu=>Menus: int,#idPlat=>Plats: int)
 
-QuantiteIngredient(#nomIngredient=>Ingredient: string, #idElement=>Plat :int, quantiteIngredient: int)
+QuantitesIngredients (#nomIngredient=>Ingredients: string, #idElement=>Plats :int, quantiteIngredient: int)
 	Contraintes: quantiteIngredient > 0
