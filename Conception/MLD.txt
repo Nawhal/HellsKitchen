@@ -1,4 +1,4 @@
-sujet mail NF17 Groupe 4
+Sujet mail NF17 Groupe 4
 écrire les contraintes, les clef candidates, ex un restaurant a une seule carte a la fois et les deux dates ne se chevauchent pas
 
 Tous les attributs où ce n’est pas spécifié NULLABLE sont NOT NULL.
@@ -14,14 +14,13 @@ Managers (#idEmploye: int, nom: string, prénom: string, dateNaissance: date, dat
 
 Serveurs (#idEmploye: int, authorisationAccueil: boolean, nom: string, prénom: string, dateNaissance: date, dateAnciennete: date, idRestaurant=>Restaurants: int) 
 	Contraintes: (nom, prénom, dateNaissance) clé candidate
-
-Cartes (#idCarte: int, nomCarte: string)
-
-Commandes (#idCommande: int, #idRestaurant=>Restaurants: int, dateCommande: date)
-
-Menus (#idElement=>Elements:int, nomMenu: string)
+	
+	Héritage (Cuisiniers, Managers, Serveurs): Nous avons choisi un héritage par classes filles car on est face à un héritage exclusif, chaque employé ne pouvant avoir deux emplois différents. La classe Employé n'ayant qu'un lien 1 - 1..* avec Restaurant, nous ne rencontrons pas de problème de redondance.
 
 Elements (#idElement: int)
+	Héritage: Nous avons choisi un héritage par références car celà nous permet de factoriser les liens entre les tables. L'inconvénient du temps de requête plus conséquent n'est pas assez grand pour être significatif.
+
+Menus (#idElement=>Elements:int, nomMenu: string)
 
 Plats (#idElement=>Elements: int, nomPlat: string, catégorie: string, entree: boolean, plat: boolean, dessert: boolean)
 
@@ -32,9 +31,13 @@ BoissonsOffertes (#idElement=>Elements: int, nomBoisson=>Boissons: string, volum
 
 Boissons (#nomBoisson: string, type: string)
 
-Ingredients (#nomIngredient: string, liquide: boolean, solide: boolean)
-	Contraintes: liquide =/= solide, un ingrédient ne peut être liquide et solide en même temps.
+Ingredients (#nomIngredient: string, liquide: boolean)
+	Héritage: Nous avons choisi un héritage par classe mère car les classes filles Liquide et Solide n'ont pas d'attributs, on a donc un héritage complet.
+	
+Cartes (#idCarte: int, nomCarte: string)
 
+Commandes (#idCommande: int, #idRestaurant=>Restaurants: int, dateCommande: date)
+	
 PeriodesCartes (#idCarte=>Cartes: int, #idRestaurant=>Restaurants: int, #dateDebut: date, dateFin: date)
 	Contraintes:
 	- dateDebut < dateFin
