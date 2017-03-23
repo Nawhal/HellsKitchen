@@ -119,7 +119,7 @@ CREATE TABLE periodeCarte
 	CHECK (dateDebut<dateFin)
 	);
 
-CREATE TABLE quantiteELement
+CREATE TABLE quantiteElement
 	(idElement INTEGER,
 	idCommande INTEGER,
 	idRestaurant INTEGER,
