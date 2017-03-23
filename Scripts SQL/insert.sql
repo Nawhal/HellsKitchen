@@ -13,6 +13,8 @@ INSERT INTO carte(idCarte, nomCarte) VALUES (1, 'Carte de Noël'), (2, 'Carte de
 
 INSERT INTO commande(idCommande, idRestaurant, dateCommande) VALUES (1, 1, '2016-04-12');
 
+INSERT INTO element(idELement) VALUES (1),(2),(3),(4);
+
 INSERT INTO menu(idElement, nomMenu) VALUES (1, 'Petites Frimousses');
 
 INSERT INTO plat(idElement, nomPlat, categorie, entree, plat, dessert) VALUES
@@ -31,3 +33,13 @@ INSERT INTO ingredient(nomIngredient, liquide) VALUES
 ('Oignon', FALSE),
 ('Cinq épices', FALSE),
 ('Sauce Soja', TRUE);
+
+INSERT INTO periodeCarte (idCarte, idRestaurant, dateDebut, dateFin) VALUES (1,1,'2016-11-14','2017-01-14');
+
+INSERT INTO quantiteElement (idElement, idCommande, idRestaurant, quantite) VALUES (1,1,1,2),(2,1,1,3);
+
+INSERT INTO prixElement (idElement, idCarte, prixElement) VALUES (1,1,12.5), (2,1,10);
+
+INSERT INTO assocMenuPlat (idMenu, idPlat) VALUES (1, 3);
+
+INSERT INTO quantiteIngredient (idElement , nomIngredient ,quantiteIngredient) VALUES (3,'Boeuf',200);
