@@ -10,17 +10,23 @@ INSERT INTO manager(idEmploye, nom, prenom, dateNaissance, dateAnciennete, idRes
 
 INSERT INTO serveur(idEmploye, nom, prenom, dateNaissance, dateAnciennete, authorisationAccueil, idRestaurant) VALUES (4, 'Sclave', 'Ashley', '1998-03-15', '2014-01-09', TRUE, 2);
 
-INSERT INTO carte(idCarte, nomCarte) VALUES (1, 'Carte de Noël'), (2, 'Carte de Hanoukka');
+INSERT INTO carte(idCarte, nomCarte) VALUES (1, 'Carte de Printemps'), (2, 'Carte de Hanoukka');
 
 INSERT INTO commande(idCommande, idRestaurant, dateCommande) VALUES (1, 1, '2016-04-12');
 
-INSERT INTO element(idELement) VALUES (1),(2),(3),(4);
+INSERT INTO element(idELement) VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10);
 
-INSERT INTO menu(idElement, nomMenu) VALUES (1, 'Petites Frimousses');
+INSERT INTO menu(idElement, nomMenu) VALUES (1, 'Saveurs asiatiques'),
+(9, 'Plaisir du terroir');
 
 INSERT INTO plat(idElement, nomPlat, categorie, entree, plat, dessert) VALUES
 (2, 'Lasagnes', 'Pâtes', FALSE, TRUE, FALSE),
-(3, 'Xiar Bin', 'Raviolis', TRUE, TRUE, FALSE);
+(5, 'Baozi', 'Raviolis', TRUE, TRUE, FALSE),
+(6, 'Magret de canard à la figue', 'Viandes', FALSE, TRUE, FALSE),
+(7, 'Duo de foies gras de canard', 'Pâtés', TRUE, FALSE, FALSE),
+(8, 'Gazpacho aux tomates séchées', 'Soupes', TRUE, FALSE, FALSE),
+(3, 'Xiar Bing', 'Raviolis', TRUE, TRUE, FALSE),
+(10, 'Fromage blanc fermier', 'Fromages', FALSE, FALSE, TRUE);
 
 INSERT INTO boisson(nomBoisson, type) VALUES ('Gulden Draak', 'Bière');
 
@@ -39,8 +45,20 @@ INSERT INTO periodeCarte (idCarte, idRestaurant, dateDebut, dateFin) VALUES (1,1
 
 INSERT INTO quantiteElement (idElement, idCommande, idRestaurant, quantite) VALUES (1,1,1,2),(2,1,1,3);
 
-INSERT INTO prixElement (idElement, idCarte, prixElement) VALUES (1,1,12.5), (2,1,10);
+INSERT INTO prixElement (idElement, idCarte, prixElement) VALUES
+(1,1,15.50),
+(2,1,10),
+(3,1,4),
+(4,1,1.90),
+(5,1,4),
+(6,1,15.90),
+(7,1,7.80),
+(8,1,3),
+(9,1,28),
+(10,1,5.50);
 
-INSERT INTO assocMenuPlat (idMenu, idPlat) VALUES (1, 3);
+INSERT INTO assocMenuPlat (idMenu, idPlat) VALUES
+(1, 3),(1, 5),
+(9, 6),(9, 7),(9, 8),(9,10);
 
 INSERT INTO quantiteIngredient (idElement , nomIngredient ,quantiteIngredient) VALUES (3,'Boeuf',200);
