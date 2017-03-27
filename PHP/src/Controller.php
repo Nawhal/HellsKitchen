@@ -21,7 +21,7 @@ class Controller
     public function __construct()
     {
         $actionsClient = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
-        $actionsServeur = array();
+        $actionsServeur = array('saisirCom', 'enregistrerCom');
         $actionsManager = array('voirStat');
         
         session_start();
@@ -89,7 +89,17 @@ class Controller
     
     private function actionServeur($action)
     {
-        
+        switch($action)
+        {
+            case 'saisirCom':
+                $this->afficherVueSaisieCommande();
+                break;
+            case 'enregistrerCom':
+                $this->enregistrerCommande();
+                break;
+            default:
+                //erreur
+        }
     }
     
     private function actionManager($action)
@@ -123,7 +133,7 @@ class Controller
         return false;
     }
     
-    public function seConnecter()
+    private function seConnecter()
     {
         if(empty($_REQUEST['login']))
         {
@@ -162,11 +172,36 @@ class Controller
         $_SESSION['idRestau']=$result[0]['idRestaurant'];
     }
     
-    public function deconnexion()
+    private function deconnexion()
     {
         session_unset();
 	session_destroy();
 	$_SESSION = array();
+    }
+    
+    private function afficherVueSaisieCommande()
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        $co->executeQuery("SELECT idCarte FROM periodeCarte WHERE idRestaurant = ? AND dateDebut<NOW() AND dateFin>=NOW()", array(1 => array($_SESSION['idRestau'],PDO::PARAM_INT )));
+        $result = $co->getResults();
+        if(count($result)<1)
+        {
+            throw new Exception("Aucune carte en cours pour votre restaurant.");
+        }
+        $idCarte = $result[0][0];
+        $co->executeQuery("SELECT idElement, nomMenu FROM menu WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?)", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $menus = $co->getResults();
+        $co->executeQuery("SELECT idElement, nomPlat FROM plat WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?)", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $plats = $co->getResults();
+        $co->executeQuery("SELECT idElement, nomBoisson FROM boissonOfferte WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?)", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $boissons = $co->getResults();
+        require("./src/view/saisieCommande.php");
+    }
+    
+    private function enregistrerCommande()
+    {
+        var_dump($_REQUEST);
     }
     
     private function afficherStat()
