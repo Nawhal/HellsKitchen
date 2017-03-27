@@ -1,4 +1,20 @@
-
+DROP TABLE Manager;
+DROP TABLE Serveur;
+DROP TABLE Cuisinier;
+DROP TABLE PeriodeCarte;
+DROP TABLE PrixElement;
+DROP TABLE QuantiteElement;
+DROP TABLE BoissonOfferte;
+DROP TABLE AssocMenuPlat;
+DROP TABLE Menu;
+DROP TABLE QuantiteIngredient;
+DROP TABLE Ingredient;
+DROP TABLE Plat;
+DROP TABLE Commande;
+DROP TABLE Boisson;
+DROP TABLE Carte;
+DROP TABLE Element;
+DROP TABLE Restaurant;
 
 CREATE TABLE restaurant 
 	(idRestaurant INTEGER NOT NULL,
@@ -93,7 +109,7 @@ CREATE TABLE boisson
 CREATE TABLE boissonOfferte
 	(idElement INTEGER PRIMARY KEY,
 	nomBoisson VARCHAR(50) NOT NULL,
-	volume FLOAT NOT NULL,
+	volume NUMERIC NOT NULL,
 	anneeProduction INTEGER,
 	UNIQUE(nomBoisson, volume, anneeProduction),
 	FOREIGN KEY(idElement) REFERENCES element(idElement),
@@ -151,7 +167,7 @@ CREATE TABLE assocMenuPlat
 CREATE TABLE quantiteIngredient
 	(idElement INTEGER,
 	nomIngredient VARCHAR(50),
-	quantiteIngredient FLOAT NOT NULL,
+	quantiteIngredient NUMERIC NOT NULL,
 	PRIMARY KEY(idElement, nomIngredient),
 	FOREIGN KEY (idElement) REFERENCES element(idElement),
 	CHECK(quantiteIngredient > 0)
