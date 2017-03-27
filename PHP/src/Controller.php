@@ -20,7 +20,7 @@ class Controller
 {
     public function __construct()
     {
-        $actionsClient = array('seConnecter', 'seDeconnecter','sansAction');
+        $actionsClient = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
         $actionsServeur = array();
         $actionsManager = array('voirStat');
         
@@ -51,7 +51,7 @@ class Controller
                                 throw new Exception("Droits Insuffisants");
                                 break;
                         default:
-                                include './src/view/accueil.php';
+                                $this->afficherAccueil();
                 }
         }
         catch(PDOException $e)
@@ -75,7 +75,12 @@ class Controller
                 break;
             case 'seDeconnecter':
                 $this->deconnexion();
+                break;
+            case 'voirCartes':
+                $this->afficherCartes();
+                break;
             case 'sansAction':
+                $this->afficherAccueil();
                 break;
             default:
                 //erreur
@@ -181,7 +186,28 @@ class Controller
 
         $co->executeQuery("select plat.nomPlat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=1 AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme;");
         $plats = $co->getResults();
-	require('./view/vueStats.php');
+	require('./src/view/vueStats.php');
      }
+     
+     
+    private function afficherAccueil()
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $query ="SELECT * FROM restaurant";
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        $co->executeQuery($query);
+        $res = $co->getResults();
+        require("./src/view/accueil.php");
+    }
+
+    private function afficherCartes()
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $query ="SELECT * FROM restaurant;";
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        $co->executeQuery($query);
+        $res = $co->getResults();
+        require("./src/view/cartes.php");
+    }
     
 }
