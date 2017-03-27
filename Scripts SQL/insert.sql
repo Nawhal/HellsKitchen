@@ -3,7 +3,7 @@ INSERT INTO restaurant(idRestaurant, nomRestaurant, adresse, ville, pays) VALUES
 
 INSERT INTO cuisinier(idEmploye, nom, prenom, dateNaissance, dateAnciennete, specialite, idRestaurant) VALUES
 (1, 'Bonneau', 'Jean', '1956-03-13', '2003-02-06', 'rôtisseur', 1),
-(2, 'Dive', 'Nathan', '1994-05-17', '2015-11-02', 'compositeur de salades', 2);
+(2, 'Dive', 'Nathan', '1994-05-17', '2015-11-02', 'compositeur de salades', 2),
 (5, 'Kitori', 'Koya', '1980-04-02', '2010-09-10', 'sushi master', 2);
 
 INSERT INTO manager(idEmploye, nom, prenom, dateNaissance, dateAnciennete, idRestaurant) VALUES (3, 'Verlinfini', 'Satan', '1962-01-24', '2010-02-02', 1);
