@@ -93,7 +93,7 @@ CREATE TABLE boisson
 CREATE TABLE boissonOfferte
 	(idElement INTEGER PRIMARY KEY,
 	nomBoisson VARCHAR(50) NOT NULL,
-	volume NUMERIC NOT NULL,
+	volume FLOAT NOT NULL,
 	anneeProduction INTEGER,
 	UNIQUE(nomBoisson, volume, anneeProduction),
 	FOREIGN KEY(idElement) REFERENCES element(idElement),
@@ -151,7 +151,7 @@ CREATE TABLE assocMenuPlat
 CREATE TABLE quantiteIngredient
 	(idElement INTEGER,
 	nomIngredient VARCHAR(50),
-	quantiteIngredient NUMERIC NOT NULL,
+	quantiteIngredient FLOAT NOT NULL,
 	PRIMARY KEY(idElement, nomIngredient),
 	FOREIGN KEY (idElement) REFERENCES element(idElement),
 	CHECK(quantiteIngredient > 0)
