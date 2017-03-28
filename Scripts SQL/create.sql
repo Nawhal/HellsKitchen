@@ -1,90 +1,174 @@
-INSERT INTO restaurant(idRestaurant, nomRestaurant, adresse, ville, pays) VALUES
-(1, 'French Touch', '12 rue du Louvre', 'Compiègne', 'France'),
-(2, 'Bistrot du Terroir', '4 rue de la Pêche', 'Compiègne', 'France');
+DROP TABLE Manager;
+DROP TABLE Serveur;
+DROP TABLE Cuisinier;
+DROP TABLE PeriodeCarte;
+DROP TABLE PrixElement;
+DROP TABLE QuantiteElement;
+DROP TABLE BoissonOfferte;
+DROP TABLE AssocMenuPlat;
+DROP TABLE Menu;
+DROP TABLE QuantiteIngredient;
+DROP TABLE Ingredient;
+DROP TABLE Plat;
+DROP TABLE Commande;
+DROP TABLE Boisson;
+DROP TABLE Carte;
+DROP TABLE Element;
+DROP TABLE Restaurant;
 
-INSERT INTO cuisinier(idEmploye, nom, prenom, dateNaissance, dateAnciennete, specialite, idRestaurant) VALUES
-(1, 'Bonneau', 'Jean', '1956-03-13', '2003-02-06', 'rôtisseur', 1),
-(2, 'Dive', 'Nathan', '1994-05-17', '2015-11-02', 'compositeur de salades', 2),
-(5, 'Kitori', 'Koya', '1980-04-02', '2010-09-10', 'sushi master', 2),
-(7, 'Cantonès', 'Henri', '1985-06-11', '2012-09-15', 'expert friture', 2);
+CREATE TABLE restaurant 
+	(idRestaurant INTEGER NOT NULL,
+	nomRestaurant VARCHAR(50) NOT NULL,
+	adresse VARCHAR(100) NOT NULL,
+	ville VARCHAR(50) NOT NULL,
+	pays VARCHAR(50) NOT NULL,
+	PRIMARY KEY (idRestaurant),
+	UNIQUE (nomRestaurant,adresse,ville,pays));
 
-INSERT INTO manager(idEmploye, nom, prenom, dateNaissance, dateAnciennete, idRestaurant) VALUES
-(3, 'Verlinfini', 'Satan', '1962-01-24', '2010-02-02', 1),
-(6, 'Mégalo', 'Paul', '1994-12-18', '2016-01-07', 2);
+CREATE TABLE cuisinier 
+	(idEmploye INTEGER NOT NULL,
+	nom VARCHAR(50) NOT NULL,
+	prenom VARCHAR(50) NOT NULL,
+	dateNaissance DATE NOT NULL,
+	dateAnciennete DATE NOT NULL,
+	specialite VARCHAR(50) NOT NULL,
+	idRestaurant INTEGER,
+	PRIMARY KEY (idEmploye),
+	FOREIGN KEY (idRestaurant) REFERENCES restaurant(idRestaurant),
+	UNIQUE (nom,prenom,dateNaissance)
+	);
 
-INSERT INTO serveur(idEmploye, nom, prenom, dateNaissance, dateAnciennete, authorisationAccueil, idRestaurant) VALUES
-(4, 'Sclave', 'Ashley', '1998-03-15', '2014-01-09', TRUE, 2);
+CREATE TABLE manager
+	(idEmploye INTEGER NOT NULL,
+	nom VARCHAR(50) NOT NULL,
+	prenom VARCHAR(50) NOT NULL,
+	dateNaissance DATE NOT NULL,
+	dateAnciennete DATE NOT NULL,
+	idRestaurant INTEGER,
+	PRIMARY KEY (idEmploye),
+	FOREIGN KEY (idRestaurant) REFERENCES restaurant(idRestaurant),
+	UNIQUE (nom,prenom,dateNaissance)
+	);
 
-INSERT INTO carte(idCarte, nomCarte) VALUES
-(1, 'Carte de Printemps'),
-(2, 'Carte des Burgers');
+CREATE TABLE serveur 
+	(idEmploye INTEGER NOT NULL,
+	nom VARCHAR(50) NOT NULL,
+	prenom VARCHAR(50) NOT NULL,
+	dateNaissance DATE NOT NULL,
+	dateAnciennete DATE NOT NULL,
+	authorisationAccueil BOOLEAN NOT NULL,
+	idRestaurant INTEGER,
+	PRIMARY KEY (idEmploye),
+	FOREIGN KEY (idRestaurant) REFERENCES restaurant(idRestaurant),
+	UNIQUE (nom,prenom,dateNaissance)
+	);
 
-INSERT INTO commande(idCommande, idRestaurant, dateCommande) VALUES (1, 1, '2016-04-12');
+CREATE TABLE carte 
+	(idCarte INTEGER NOT NULL,
+	nomCarte VARCHAR(60) NOT NULL,
+	PRIMARY KEY (idCarte)
+	);
 
-INSERT INTO element(idElement) VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15);
+CREATE TABLE commande
+	(idCommande INTEGER,
+	idRestaurant INTEGER,
+	dateCommande DATE NOT NULL,
+	PRIMARY KEY(idCommande, idRestaurant),
+	FOREIGN KEY (idRestaurant) REFERENCES restaurant(idRestaurant)
+	);
 
-INSERT INTO menu(idElement, nomMenu) VALUES
-(1, 'Saveurs asiatiques'),
-(9, 'Plaisir du terroir'),
-(13, 'Menu Etudiant');
 
-INSERT INTO plat(idElement, nomPlat, categorie, entree, plat, dessert) VALUES
-(2, 'Lasagnes', 'Pâtes', FALSE, TRUE, FALSE),
-(5, 'Baozi', 'Raviolis', TRUE, TRUE, FALSE),
-(6, 'Magret de canard à la figue', 'Viandes', FALSE, TRUE, FALSE),
-(7, 'Duo de foies gras de canard', 'Pâtés', TRUE, FALSE, FALSE),
-(8, 'Gazpacho aux tomates séchées', 'Soupes', TRUE, FALSE, FALSE),
-(3, 'Xiar Bing', 'Raviolis', TRUE, TRUE, FALSE),
-(10, 'Fromage blanc fermier', 'Fromages', FALSE, FALSE, TRUE),
-(11, 'Gâteaux de riz haricot rouge', 'Pâtisseries', FALSE, FALSE, TRUE),
-(14, 'Frites fraîches', 'Accompagnements', TRUE, TRUE, FALSE),
-(15, 'Burger', 'Sandwiches', FALSE, TRUE, FALSE);
+CREATE TABLE element
+	(idELement INTEGER PRIMARY KEY
+	);
 
-INSERT INTO boisson(nomBoisson, type) VALUES
-('Gulden Draak', 'Bière'),
-('Thé au riz grillé', 'Thé');
+CREATE TABLE menu
+	(idElement INTEGER,
+	nomMenu VARCHAR(50) NOT NULL,
+	PRIMARY KEY (idElement),
+	FOREIGN KEY (idElement) REFERENCES element(idElement)	
+	);
 
-INSERT INTO boissonOfferte(idElement, nomBoisson, volume, anneeProduction) VALUES
-(4, 'Gulden Draak', 3.3, NULL),
-(12, 'Thé au riz grillé', 3.3, NULL);
+CREATE TABLE plat 
+	(idElement INTEGER PRIMARY KEY,
+	nomPlat VARCHAR(50),
+	categorie VARCHAR(50) NOT NULL,
+	entree BOOLEAN NOT NULL,
+	plat BOOLEAN NOT NULL,
+	dessert BOOLEAN NOT NULL,
+	FOREIGN KEY(idElement) REFERENCES element(idElement)
+	);
 
-INSERT INTO ingredient(nomIngredient, liquide) VALUES
-('Cheval', FALSE),
-('Pâtes', FALSE),
-('Boeuf', FALSE),
-('Béchamel', TRUE),
-('Oignon', FALSE),
-('Cinq épices', FALSE),
-('Sauce Soja', TRUE);
 
-INSERT INTO periodeCarte (idCarte, idRestaurant, dateDebut, dateFin) VALUES
-(1,2,'2016-11-14','2017-01-14'),
-(2,1,'2016-11-14','2017-01-14');
+CREATE TABLE boisson
+	(nomBoisson VARCHAR(50),
+	type VARCHAR(40),
+	PRIMARY KEY(nomBoisson)
+	);
 
-INSERT INTO quantiteElement (idElement, idCommande, idRestaurant, quantite) VALUES
-(1,1,1,2),
-(2,1,1,3);
+CREATE TABLE boissonOfferte
+	(idElement INTEGER PRIMARY KEY,
+	nomBoisson VARCHAR(50) NOT NULL,
+	volume NUMERIC NOT NULL,
+	anneeProduction INTEGER,
+	UNIQUE(nomBoisson, volume, anneeProduction),
+	FOREIGN KEY(idElement) REFERENCES element(idElement),
+	FOREIGN KEY (nomBoisson) REFERENCES boisson(nomBoisson),
+	CHECK(volume > 0)
+	);
 
-INSERT INTO prixElement (idElement, idCarte, prixElement) VALUES
-(1,1,15.50),
-(2,1,10),
-(3,1,4),
-(4,2,1.90),
-(5,1,4),
-(6,1,15.90),
-(7,1,7.80),
-(8,1,3),
-(9,1,28),
-(10,1,5.50),
-(11,1,6),
-(12,1,3.50),
-(13,2,3.50),
-(14,2,6.90);
 
-INSERT INTO assocMenuPlat (idMenu, idPlat) VALUES
-(1, 3),(1, 5),(1,11),
-(9, 6),(9, 7),(9, 8),(9,10),
-(13,14),(13,15);
+CREATE TABLE ingredient 
+	(nomIngredient VARCHAR(50),
+	liquide BOOLEAN NOT NULL,
+	PRIMARY KEY (nomIngredient)
+	);
 
-INSERT INTO quantiteIngredient (idElement , nomIngredient ,quantiteIngredient) VALUES
-(3,'Boeuf',200);
+CREATE TABLE periodeCarte
+	(idCarte INTEGER,
+	idRestaurant INTEGER,
+	dateDebut DATE,
+	dateFin DATE NOT NULL,
+	PRIMARY KEY(idCarte, idRestaurant, dateDebut),
+	FOREIGN KEY (idCarte) REFERENCES carte(idCarte),
+	FOREIGN KEY (idRestaurant) REFERENCES restaurant(idRestaurant),
+	CHECK (dateDebut<dateFin)
+	);
+
+CREATE TABLE quantiteElement
+	(idElement INTEGER,
+	idCommande INTEGER,
+	idRestaurant INTEGER,
+	quantite INTEGER NOT NULL,
+	PRIMARY KEY(idElement, idCommande, idRestaurant),
+	FOREIGN KEY (idElement) REFERENCES element(idElement),
+	FOREIGN KEY (idCommande, idRestaurant) REFERENCES commande(idCommande, idRestaurant),
+	CHECK(quantite > 0)
+	);
+
+CREATE TABLE prixElement
+	(idElement INTEGER,
+	idCarte INTEGER,
+	prixElement NUMERIC NOT NULL,
+	PRIMARY KEY(idElement, idCarte),
+	FOREIGN KEY(idElement) REFERENCES element(idElement),
+	FOREIGN KEY(idCarte) REFERENCES carte(idCarte),
+	CHECK(prixElement > 0)	
+	);
+
+CREATE TABLE assocMenuPlat
+	(idMenu INTEGER,
+	idPlat INTEGER,
+	PRIMARY KEY(idMenu, idPlat),
+	FOREIGN KEY(idMenu) REFERENCES menu(idElement),
+	FOREIGN KEY(idPlat) REFERENCES plat(idElement)
+	);
+
+CREATE TABLE quantiteIngredient
+	(idElement INTEGER,
+	nomIngredient VARCHAR(50),
+	quantiteIngredient NUMERIC NOT NULL,
+	PRIMARY KEY(idElement, nomIngredient),
+	FOREIGN KEY (idElement) REFERENCES element(idElement),
+	CHECK(quantiteIngredient > 0)
+	);
