@@ -1,5 +1,5 @@
 <?php
-// Liste des employer : gestion du personnel supprimer /ajouter un gas
+// Liste des employés : gestion du personnel supprimer /ajouter un gas
 // Ajouter une commande
 /*
 SELECT idElement, quantite, idCommande
@@ -20,7 +20,7 @@ class Controller
 {
     public function __construct()
     {
-        $actionsClient = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
+        $actionsClient 	= array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
         $actionsServeur = array('saisirCom', 'enregistrerCom');
         $actionsManager = array('voirStat');
         
@@ -238,10 +238,30 @@ class Controller
     private function afficherCartes()
     {
         $dbInfos = Config::getDataBaseInfos();
-        $query ="SELECT * FROM restaurant;";
+
+		//Toutes les cartes du restaurant voulu
+        $query ="SELECT Carte.idCarte,Carte.nomCarte
+					FROM Carte,periodeCarte
+						WHERE Carte.idCarte=periodeCarte.idCarte
+						AND periodeCarte.idRestaurant=".$_GET['id'].";";
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
         $co->executeQuery($query);
-        $res = $co->getResults();
+        $cartes = $co->getResults();
+
+		$query ="SELECT DISTINCT carte.idCarte,menu.idElement,menu.nomMenu,prixElement.prixElement
+				FROM menu,prixElement,carte
+					WHERE prixElement.idElement=menu.idElement;";
+		$co->executeQuery($query);
+        $menus = $co->getResults();
+
+		$query ="SELECT plat.nomPlat,prixElement.prixElement
+					FROM plat,prixElement,carte
+						WHERE plat.idElement=prixElement.idElement
+						AND Carte.idCarte=prixElement.idCarte
+						AND prixElement.idCarte=1;";
+		$co->executeQuery($query);
+        $menus = $co->getResults();
+
         require("./src/view/cartes.php");
     }
     
