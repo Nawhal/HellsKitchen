@@ -1,18 +1,43 @@
+Sélectionne toutes les cartes d'un restaurant:
+
+SELECT Carte.idCarte,Carte.nomCarte
+	FROM Carte,periodeCarte
+		WHERE Carte.idCarte=periodeCarte.idCarte
+		AND periodeCarte.idRestaurant=1;
+
+
 Sélectionne tous les plats d'un menu:
 
-SELECT plat.nomPlat, menu.nomMenu FROM plat,menu,assocMenuPlat WHERE plat.idElement=assocMenuPlat.idPlat AND assocMenuPlat.idMenu=menu.idElement AND menu.nomMenu='Plaisir du terroir' ORDER BY menu.nomMenu;
+SELECT plat.nomPlat, menu.nomMenu
+	FROM plat,menu,assocMenuPlat
+		WHERE plat.idElement=assocMenuPlat.idPlat
+		AND assocMenuPlat.idMenu=menu.idElement
+		AND menu.nomMenu='Plaisir du terroir'
+			ORDER BY menu.nomMenu;
 
 
-Selectionne tous les plats et leur prix:
+Selectionne tous les plats de la carte X et leur prix:
 
-SELECT plat.nomPlat,prixElement.prixElement FROM plat, prixElement WHERE plat.idElement=prixElement.idElement;
+SELECT plat.nomPlat,prixElement.prixElement
+	FROM plat,prixElement,carte
+		WHERE plat.idElement=prixElement.idElement
+		AND Carte.idCarte=prixElement.idCarte
+		AND prixElement.idCarte=1;
 
 
-Selectionne toutes les boissons et leur prix:
+Selectionne toutes les boissons de la carte X et leur prix:
 
-SELECT boisson.nomBoisson,prixElement.prixElement FROM boisson,boissonOfferte,prixElement WHERE boissonOfferte.nomBoisson = boisson.nomBoisson AND prixElement.idElement=boissonOfferte.idElement;
+SELECT boisson.nomBoisson,prixElement.prixElement
+	FROM boisson,boissonOfferte,prixElement,carte
+		WHERE boissonOfferte.nomBoisson = boisson.nomBoisson
+		AND prixElement.idElement=boissonOfferte.idElement
+		AND prixElement.idCarte=Carte.idCarte
+		AND prixElement.idCarte=2;
 
-Selectionne tous les menus et leur prix:
+Selectionne tous les menus de la carte Xet leur prix:
 
-SELECT menu.nomMenu,prixElement.prixElement FROM menu,prixElement WHERE prixElement.idElement=menu.idElement;
-
+SELECT menu.nomMenu,prixElement.prixElement
+	FROM menu,prixElement,carte
+		WHERE prixElement.idElement=menu.idElement
+		AND prixElement.idCarte=Carte.idCarte
+		AND prixElement.idCarte=1;
