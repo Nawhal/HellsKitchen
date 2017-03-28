@@ -164,7 +164,7 @@ class Controller
             $result = $co->getResults();
             if(count($result) < 1 || $result[0]['nom']!=$nom || $result[0]['prenom']!=$prenom)
             {
-                throw new Exception("Login incorrect".$nom.$prenom);
+                throw new Exception("Login incorrect");
             }
             $_SESSION['login']=$result[0]['prenom'].'.'.$result[0]['nom'];
             $_SESSION['role']='serveur';

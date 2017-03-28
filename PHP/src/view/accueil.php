@@ -12,7 +12,7 @@
 		<?php
                     foreach($res as $key => $val)
                     {
-			echo '<li> <a href=\'?action=voirCartes&id='.$val['idRestaurant'].'\'>'.$val['nomRestaurant'].'</a> a '.$val['ville'].', '.$val['pays'].' - '.$val['adresse'].'</li>';
+			echo '<li> <a href=\'?action=voirCartes&id='.$val['idrestaurant'].'\'>'.$val['nomrestaurant'].'</a> a '.$val['ville'].', '.$val['pays'].' - '.$val['adresse'].'</li>';
                     }
 		?>
             </ul>
