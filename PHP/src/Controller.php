@@ -22,7 +22,7 @@ class Controller
     {
         $actionsClient  = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
         $actionsServeur = array('saisirCom', 'enregistrerCom');
-        $actionsManager = array('voirStat');
+        $actionsManager = array('voirStat', 'voirEmp', 'suppEmp');
         
         session_start();
         
@@ -111,6 +111,12 @@ class Controller
             case 'voirStat':
                 $this->afficherStat();
                 break;
+            case 'voirEmp':
+                $this->listerEmployes();
+                break;
+            case 'suppEmp':
+                $this->listerEmployes();
+                break;
             default:
                 //erreur
         }
@@ -164,7 +170,7 @@ class Controller
             $result = $co->getResults();
             if(count($result) < 1 || $result[0]['nom']!=$nom || $result[0]['prenom']!=$prenom)
             {
-                throw new Exception("Login incorrect");
+                throw new Exception("Login incorrect".$nom.$prenom);
             }
             $_SESSION['login']=$result[0]['prenom'].'.'.$result[0]['nom'];
             $_SESSION['role']='serveur';
@@ -239,6 +245,23 @@ class Controller
                                                                                                             4 => array($qte, PDO::PARAM_INT)));
            }
        }
+    }
+    
+    private function listerEmployes()
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        $co->executeQuery("(SELECT idEmploye, nom, prenom, 'manager' AS type FROM manager WHERE idRestaurant=?)
+                            UNION
+                            (SELECT idEmploye, nom, prenom, 'cuisinier' AS type FROM cuisinier WHERE idRestaurant=?)
+                            UNION
+                            (SELECT idEmploye, nom, prenom, 'serveur' AS type FROM serveur WHERE idRestaurant=?)
+                            ORDER BY nom,prenom;", array(
+                                                        1 => array($_SESSION['idRestau'], PDO::PARAM_INT),
+                                                        2 => array($_SESSION['idRestau'], PDO::PARAM_INT),
+                                                        3 => array($_SESSION['idRestau'], PDO::PARAM_INT)));
+        $employes = $co->getResults();
+        require("./src/view/vueEmployes.php");
     }
     
     private function afficherStat()
