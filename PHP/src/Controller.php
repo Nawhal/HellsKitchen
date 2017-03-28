@@ -20,7 +20,7 @@ class Controller
 {
     public function __construct()
     {
-        $actionsClient 	= array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
+        $actionsClient  = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
         $actionsServeur = array('saisirCom', 'enregistrerCom');
         $actionsManager = array('voirStat');
         
