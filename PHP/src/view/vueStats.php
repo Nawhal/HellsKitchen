@@ -5,6 +5,7 @@
         ?>
     </head>
     <body>
+        <?php require_once './src/view/menu.php'; ?>
         <h1>Statistiques</h1>
         <div>
             <?php

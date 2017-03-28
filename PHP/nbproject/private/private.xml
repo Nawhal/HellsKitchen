@@ -5,8 +5,9 @@
         <group>
             <file>file:/var/www/HellsKitchen/src/view/header.php</file>
             <file>file:/var/www/HellsKitchen/src/Controller.php</file>
-            <file>file:/var/www/HellsKitchen/index.php</file>
+            <file>file:/var/www/HellsKitchen/src/view/menu.php</file>
             <file>file:/var/www/HellsKitchen/src/view/accueil.php</file>
+            <file>file:/var/www/HellsKitchen/src/Config.php</file>
             <file>file:/var/www/HellsKitchen/src/view/vueStats.php</file>
             <file>file:/var/www/HellsKitchen/src/view/saisieCommande.php</file>
             <file>file:/var/www/HellsKitchen/src/view/cartes.php</file>

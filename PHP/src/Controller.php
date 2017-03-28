@@ -72,9 +72,11 @@ class Controller
         {
             case 'seConnecter':
                 $this->seConnecter();
+                $this->afficherAccueil();
                 break;
             case 'seDeconnecter':
                 $this->deconnexion();
+                $this->afficherAccueil();
                 break;
             case 'voirCartes':
                 $this->afficherCartes();
@@ -158,9 +160,11 @@ class Controller
             $co->executeQuery("SELECT * FROM serveur WHERE nom = ? AND prenom = ?;", array( 1 => array($nom, PDO::PARAM_STR),
                                                                                         2 => array($prenom, PDO::PARAM_STR)
                                                                                       ));
+            
+            $result = $co->getResults();
             if(count($result) < 1 || $result[0]['nom']!=$nom || $result[0]['prenom']!=$prenom)
             {
-                throw new Exception("Login incorrect");
+                throw new Exception("Login incorrect".$nom.$prenom);
             }
             $_SESSION['login']=$result[0]['prenom'].'.'.$result[0]['nom'];
             $_SESSION['role']='serveur';
@@ -183,25 +187,58 @@ class Controller
     {
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
-        $co->executeQuery("SELECT idCarte FROM periodeCarte WHERE idRestaurant = ? AND dateDebut<NOW() AND dateFin>=NOW()", array(1 => array($_SESSION['idRestau'],PDO::PARAM_INT )));
+        $co->executeQuery("SELECT idCarte, dateDebut, dateFin FROM periodeCarte WHERE idRestaurant = ? AND dateDebut<NOW() AND dateFin>=NOW()", array(1 => array($_SESSION['idRestau'],PDO::PARAM_INT )));
         $result = $co->getResults();
         if(count($result)<1)
         {
             throw new Exception("Aucune carte en cours pour votre restaurant.");
         }
-        $idCarte = $result[0][0];
-        $co->executeQuery("SELECT idElement, nomMenu FROM menu WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?)", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $idCarte = $result[0]['idCarte'];
+        $dateDebut = $result[0]['dateDebut'];
+        $dateFin = $result[0]['dateFin'];
+        $co->executeQuery("SELECT nomCarte FROM carte WHERE idCarte= ?;", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $result = $co->getResults();
+        $nomCarte = $result[0]['nomCarte'];
+        $co->executeQuery("SELECT idElement, nomMenu FROM menu WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
         $menus = $co->getResults();
-        $co->executeQuery("SELECT idElement, nomPlat FROM plat WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?)", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $co->executeQuery("SELECT idElement, nomPlat FROM plat WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
         $plats = $co->getResults();
-        $co->executeQuery("SELECT idElement, nomBoisson FROM boissonOfferte WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?)", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $co->executeQuery("SELECT idElement, nomBoisson FROM boissonOfferte WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
         $boissons = $co->getResults();
         require("./src/view/saisieCommande.php");
     }
     
     private function enregistrerCommande()
     {
-        var_dump($_REQUEST);
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        $co->executeQuery("SELECT MAX(idCommande) AS maxId FROM commande;");
+        $result = $co->getResults();
+        $idCommande = $result[0]['maxId'];
+        $idCommande++;
+        $co->executeQuery("INSERT INTO commande(idCommande, idRestaurant, dateCommande) VALUES (?, ?, NOW());", array(1 => array($idCommande, PDO::PARAM_INT), 
+                                                                                                                      2 => array($_SESSION['idRestau'], PDO::PARAM_INT)));
+        if(isset($_GET['menus']))
+            {$this->enregisterQuantiteCom($_GET['menus'], $idCommande, $co);}
+        if(isset($_GET['plats']))
+            {$this->enregisterQuantiteCom($_GET['plats'], $idCommande, $co);}
+        if(isset($_GET['boissons']))
+            {$this->enregisterQuantiteCom($_GET['boissons'], $idCommande, $co);}
+    }
+    
+    private function enregisterQuantiteCom(array $element, $idCommande, $co)
+    {
+       foreach($element as $key => $qte)
+       {
+           if($qte > 0)
+           {
+               $co->executeQuery("INSERT INTO quantiteElement(idElement, idCommande, idRestaurant, quantite) VALUES (?,?,?,?);", array(
+                                                                                                            1 => array($key, PDO::PARAM_INT),
+                                                                                                            2 => array($idCommande, PDO::PARAM_INT),
+                                                                                                            3 => array($_SESSION['idRestau'], PDO::PARAM_INT),
+                                                                                                            4 => array($qte, PDO::PARAM_INT)));
+           }
+       }
     }
     
     private function afficherStat()
@@ -248,18 +285,18 @@ class Controller
         $co->executeQuery($query);
         $cartes = $co->getResults();
 
-		$query ="SELECT DISTINCT carte.idCarte,menu.idElement,menu.nomMenu,prixElement.prixElement
-				FROM menu,prixElement,carte
-					WHERE prixElement.idElement=menu.idElement;";
-		$co->executeQuery($query);
+        $query ="SELECT DISTINCT carte.idCarte,menu.idElement,menu.nomMenu,prixElement.prixElement
+                        FROM menu,prixElement,carte
+                                WHERE prixElement.idElement=menu.idElement;";
+        $co->executeQuery($query);
         $menus = $co->getResults();
 
-		$query ="SELECT plat.nomPlat,prixElement.prixElement
-					FROM plat,prixElement,carte
-						WHERE plat.idElement=prixElement.idElement
-						AND Carte.idCarte=prixElement.idCarte
-						AND prixElement.idCarte=1;";
-		$co->executeQuery($query);
+        $query ="SELECT plat.nomPlat,prixElement.prixElement
+                                FROM plat,prixElement,carte
+                                        WHERE plat.idElement=prixElement.idElement
+                                        AND Carte.idCarte=prixElement.idCarte
+                                        AND prixElement.idCarte=1;";
+        $co->executeQuery($query);
         $menus = $co->getResults();
 
         require("./src/view/cartes.php");
