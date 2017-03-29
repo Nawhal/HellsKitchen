@@ -297,6 +297,8 @@ class Controller
 
     private function afficherCartes()
     {
+           private function afficherCartes()
+    {
         $dbInfos = Config::getDataBaseInfos();
 
 		//Toutes les cartes du restaurant voulu
@@ -308,21 +310,63 @@ class Controller
         $co->executeQuery($query);
         $cartes = $co->getResults();
 
-        $query ="SELECT DISTINCT carte.idCarte,menu.idElement,menu.nomMenu,prixElement.prixElement
-                        FROM menu,prixElement,carte
-                                WHERE prixElement.idElement=menu.idElement;";
-        $co->executeQuery($query);
-        $menus = $co->getResults();
+        //Tous les menus de toutes les cartes du restaurant
+        $menus = array();
+        foreach($cartes as $key => $val)
+        {
+            $query = "SELECT menu.nomMenu,prixElement.prixElement
+	                    FROM menu,prixElement,carte
+		                    WHERE prixElement.idElement=menu.idElement
+		                    AND prixElement.idCarte=Carte.idCarte
+		                    AND prixElement.idCarte=".$val['idcarte'].";";
+            $co->executeQuery($query);
+            array_push($menus, $co->getResults());
+        } var_dump($menus);
+        
+        //Tous les plats de chaque menu
+		$platsDeMenu = array();
+        foreach($menus as $key => $val)
+        {
+            $query = "SELECT plat.nomPlat, menu.nomMenu
+	                    FROM plat,menu,assocMenuPlat
+		                    WHERE plat.idElement=assocMenuPlat.idPlat
+		                    AND assocMenuPlat.idMenu=menu.idElement
+		                    AND menu.nomMenu=\"".$val['nommenu']."\"
+			                    ORDER BY menu.nomMenu;";
+            $co->executeQuery($query);
+            array_push($platsDeMenu, $co->getResults());
+        }
+        
+        //Tous les plats (indépendamment d'un menu) de toutes les cartes du restaurant
+        $plats = array();
+        foreach($cartes as $key => $val)
+        {
+            $query = "SELECT plat.nomPlat,prixElement.prixElement
+	                    FROM plat,prixElement,carte
+		                    WHERE plat.idElement=prixElement.idElement
+		                    AND Carte.idCarte=prixElement.idCarte
+		                    AND prixElement.idCarte=".$val['idcarte'].";";
+            $co->executeQuery($query);
+            array_push($plats, $co->getResults());
+        }
 
-        $query ="SELECT plat.nomPlat,prixElement.prixElement
-                                FROM plat,prixElement,carte
-                                        WHERE plat.idElement=prixElement.idElement
-                                        AND Carte.idCarte=prixElement.idCarte
-                                        AND prixElement.idCarte=1;";
-        $co->executeQuery($query);
-        $menus = $co->getResults();
+        //Toutes les boissons de toutes les cartes du restaurant
+        $boissons = array();
+        foreach($cartes as $key => $val)
+        {
+            $query = "SELECT boisson.nomBoisson,prixElement.prixElement
+	                    FROM boisson,boissonOfferte,prixElement,carte
+		                    WHERE boissonOfferte.nomBoisson = boisson.nomBoisson
+		                    AND prixElement.idElement=boissonOfferte.idElement
+		                    AND prixElement.idCarte=Carte.idCarte
+		                    AND prixElement.idCarte=".$val['idcarte'].";";
+            $co->executeQuery($query);
+            array_push($boissons, $co->getResults());
+        }
+		
 
         require("./src/view/cartes.php");
+    }
     }
     
 }
