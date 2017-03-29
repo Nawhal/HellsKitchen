@@ -403,9 +403,5 @@ class Controller
 
         require("./src/view/cartes.php");
     }
-		
-
-        require("./src/view/cartes.php");
-    }
     
 }
