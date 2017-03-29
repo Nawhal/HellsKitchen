@@ -22,7 +22,7 @@ class Controller
     {
         $actionsClient  = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
         $actionsServeur = array('saisirCom', 'enregistrerCom');
-        $actionsManager = array('voirStat', 'voirEmp', 'suppEmp');
+        $actionsManager = array('voirStat', 'voirEmp', 'suppEmp', 'addEmp');
         
         session_start();
         
@@ -115,6 +115,11 @@ class Controller
                 $this->listerEmployes();
                 break;
             case 'suppEmp':
+                $this->suppEmploye();
+                $this->listerEmployes();
+                break;
+            case 'addEmp':
+                $this->addEmploye();
                 $this->listerEmployes();
                 break;
             default:
@@ -157,29 +162,29 @@ class Controller
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
         
-        $co->executeQuery("SELECT * FROM manager WHERE nom = ? AND prenom = ?;", array( 1 => array($nom, PDO::PARAM_STR),
+        $co->executeQuery("SELECT idemploye, nom, prenom, idrestaurant FROM manager WHERE nom = ? AND prenom = ?;", array( 1 => array($nom, PDO::PARAM_STR),
                                                                                         2 => array($prenom, PDO::PARAM_STR)
                                                                                       ));
         $result = $co->getResults();
         if(count($result) < 1 || $result[0]['nom']!=$nom || $result[0]['prenom']!=$prenom)
         {
-            $co->executeQuery("SELECT * FROM serveur WHERE nom = ? AND prenom = ?;", array( 1 => array($nom, PDO::PARAM_STR),
+            $co->executeQuery("SELECT idemploye, nom, prenom, idrestaurant FROM serveur WHERE nom = ? AND prenom = ?;", array( 1 => array($nom, PDO::PARAM_STR),
                                                                                         2 => array($prenom, PDO::PARAM_STR)
                                                                                       ));
             
             $result = $co->getResults();
             if(count($result) < 1 || $result[0]['nom']!=$nom || $result[0]['prenom']!=$prenom)
             {
-                throw new Exception("Login incorrect".$nom.$prenom);
+                throw new Exception("Login incorrect");
             }
             $_SESSION['login']=$result[0]['prenom'].'.'.$result[0]['nom'];
             $_SESSION['role']='serveur';
-            $_SESSION['idRestau']=$result[0]['idRestaurant'];
+            $_SESSION['idRestau']=$result[0]['idrestaurant'];
             return;
         }
         $_SESSION['login']=$result[0]['prenom'].'.'.$result[0]['nom'];
         $_SESSION['role']='manager';
-        $_SESSION['idRestau']=$result[0]['idRestaurant'];
+        $_SESSION['idRestau']=$result[0]['idrestaurant'];
     }
     
     private function deconnexion()
@@ -193,23 +198,23 @@ class Controller
     {
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
-        $co->executeQuery("SELECT idCarte, dateDebut, dateFin FROM periodeCarte WHERE idRestaurant = ? AND dateDebut<NOW() AND dateFin>=NOW()", array(1 => array($_SESSION['idRestau'],PDO::PARAM_INT )));
+        $co->executeQuery("SELECT idcarte, datedebut, datefin FROM periodeCarte WHERE idRestaurant = ? AND dateDebut<NOW() AND dateFin>=NOW()", array(1 => array($_SESSION['idRestau'],PDO::PARAM_INT )));
         $result = $co->getResults();
         if(count($result)<1)
         {
             throw new Exception("Aucune carte en cours pour votre restaurant.");
         }
-        $idCarte = $result[0]['idCarte'];
-        $dateDebut = $result[0]['dateDebut'];
-        $dateFin = $result[0]['dateFin'];
-        $co->executeQuery("SELECT nomCarte FROM carte WHERE idCarte= ?;", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $idCarte = $result[0]['idcarte'];
+        $dateDebut = $result[0]['datedebut'];
+        $dateFin = $result[0]['datefin'];
+        $co->executeQuery("SELECT nomcarte FROM carte WHERE idCarte= ?;", array(1 => array($idCarte, PDO::PARAM_INT)));
         $result = $co->getResults();
-        $nomCarte = $result[0]['nomCarte'];
-        $co->executeQuery("SELECT idElement, nomMenu FROM menu WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $nomCarte = $result[0]['nomcarte'];
+        $co->executeQuery("SELECT idelement, nommenu FROM menu WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
         $menus = $co->getResults();
-        $co->executeQuery("SELECT idElement, nomPlat FROM plat WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $co->executeQuery("SELECT idelement, nomplat FROM plat WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
         $plats = $co->getResults();
-        $co->executeQuery("SELECT idElement, nomBoisson FROM boissonOfferte WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
+        $co->executeQuery("SELECT idelement, nomboisson FROM boissonOfferte WHERE idElement IN (SELECT idElement FROM prixElement WHERE idCarte=?);", array(1 => array($idCarte, PDO::PARAM_INT)));
         $boissons = $co->getResults();
         require("./src/view/saisieCommande.php");
     }
@@ -218,9 +223,9 @@ class Controller
     {
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
-        $co->executeQuery("SELECT MAX(idCommande) AS maxId FROM commande;");
+        $co->executeQuery("SELECT MAX(idCommande) AS maxid FROM commande;");
         $result = $co->getResults();
-        $idCommande = $result[0]['maxId'];
+        $idCommande = $result[0]['maxid'];
         $idCommande++;
         $co->executeQuery("INSERT INTO commande(idCommande, idRestaurant, dateCommande) VALUES (?, ?, NOW());", array(1 => array($idCommande, PDO::PARAM_INT), 
                                                                                                                       2 => array($_SESSION['idRestau'], PDO::PARAM_INT)));
@@ -230,6 +235,7 @@ class Controller
             {$this->enregisterQuantiteCom($_GET['plats'], $idCommande, $co);}
         if(isset($_GET['boissons']))
             {$this->enregisterQuantiteCom($_GET['boissons'], $idCommande, $co);}
+        require("./src/view/commandeOk.php");
     }
     
     private function enregisterQuantiteCom(array $element, $idCommande, $co)
@@ -251,17 +257,104 @@ class Controller
     {
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
-        $co->executeQuery("(SELECT idEmploye, nom, prenom, 'manager' AS type FROM manager WHERE idRestaurant=?)
+        $co->executeQuery("(SELECT idemploye, nom, prenom, 'manager' AS type FROM manager WHERE idRestaurant=?)
                             UNION
-                            (SELECT idEmploye, nom, prenom, 'cuisinier' AS type FROM cuisinier WHERE idRestaurant=?)
+                            (SELECT idemploye, nom, prenom, 'cuisinier' AS type FROM cuisinier WHERE idRestaurant=?)
                             UNION
-                            (SELECT idEmploye, nom, prenom, 'serveur' AS type FROM serveur WHERE idRestaurant=?)
+                            (SELECT idemploye, nom, prenom, 'serveur' AS type FROM serveur WHERE idRestaurant=?)
                             ORDER BY nom,prenom;", array(
                                                         1 => array($_SESSION['idRestau'], PDO::PARAM_INT),
                                                         2 => array($_SESSION['idRestau'], PDO::PARAM_INT),
                                                         3 => array($_SESSION['idRestau'], PDO::PARAM_INT)));
         $employes = $co->getResults();
         require("./src/view/vueEmployes.php");
+    }
+    
+    private function suppEmploye()
+    {
+        if(empty($_GET['id']) || empty($_GET['type']))
+        {
+            return;
+        }
+        $type = $_GET['type'];
+        $id = $_GET['id'];
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        switch($type)
+        {
+            case 'cuisinier':
+                $co->executeQuery("DELETE FROM cuisinier WHERE idEmploye=?;", array(1=> array($id,PDO::PARAM_INT)));
+                break;
+            case 'serveur':
+                $co->executeQuery("DELETE FROM serveur WHERE idEmploye=?;", array(1=> array($id,PDO::PARAM_INT)));
+                break;
+            case 'manager':
+                $co->executeQuery("DELETE FROM manager WHERE idEmploye=?;", array(1=> array($id,PDO::PARAM_INT)));
+                break;
+            default:
+                return;
+        }
+    }
+    
+    private function addEmploye()
+    {
+        if(empty($_GET['nom']) || empty($_GET['prenom']) || empty($_GET['type']) || empty($_GET['datenais']))
+        {
+            return;
+        }
+        date_default_timezone_set('Europe/Paris');
+        $date = DateTime::createFromFormat('d/m/Y', $_GET['datenais']);
+        if($date == null)
+            return;
+        $date = $date->format('Y-m-d');
+        $nom = ucfirst(strtolower($_GET['nom']));
+        $prenom = ucfirst(strtolower($_GET['prenom']));
+        $type = $_GET['type'];
+        $accueil = (isset($_GET['okaccueil']) && $_GET['okaccueil']=='ok') ? true : false;
+        $spec = !empty($_GET['spec']) ? $_GET['spec'] : '';
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        $co->executeQuery("(SELECT idemploye FROM cuisinier)"
+                        . "UNION (SELECT idemploye FROM manager)"
+                        . "UNION (SELECT idemploye FROM serveur)"
+                        . "ORDER BY idemploye DESC;");
+        $idemp = $co->getResults();
+        $idemp = count($idemp) < 1 ? 1 : $idemp[0]['idemploye'];
+        $idemp++;
+        switch($type)
+        {
+            case 'cuisinier':
+                $co->executeQuery("INSERT INTO cuisinier(idEmploye, nom, prenom, dateNaissance, dateAnciennete, specialite, idRestaurant) VALUES (?,?,?,?, NOW(), ?,?);", array(
+                    1 => array($idemp, PDO::PARAM_INT),
+                    2 => array($nom, PDO::PARAM_STR),
+                    3 => array($prenom, PDO::PARAM_STR),
+                    4 => array($date, PDO::PARAM_STR),
+                    5 => array($spec, PDO::PARAM_STR),
+                    6 => array($_SESSION['idRestau'], PDO::PARAM_INT)
+                ));
+                break;
+            case 'manager':
+                $co->executeQuery("INSERT INTO manager(idEmploye, nom, prenom, dateNaissance, dateAnciennete, idRestaurant) VALUES (?,?,?,?, NOW(),?);", array(
+                    1 => array($idemp, PDO::PARAM_INT),
+                    2 => array($nom, PDO::PARAM_STR),
+                    3 => array($prenom, PDO::PARAM_STR),
+                    4 => array($date, PDO::PARAM_STR),
+                    5 => array($_SESSION['idRestau'], PDO::PARAM_INT)
+                ));
+                break;
+            case 'serveur':
+                $co->executeQuery("INSERT INTO serveur(idEmploye, nom, prenom, dateNaissance, dateAnciennete, authorisationAccueil, idRestaurant) VALUES (?,?,?,?, NOW(), ?,?);", array(
+                    1 => array($idemp, PDO::PARAM_INT),
+                    2 => array($nom, PDO::PARAM_STR),
+                    3 => array($prenom, PDO::PARAM_STR),
+                    4 => array($date, PDO::PARAM_STR),
+                    5 => array($accueil, PDO::PARAM_BOOL),
+                    6 => array($_SESSION['idRestau'], PDO::PARAM_INT)
+                ));
+                break;
+            default:
+                return;
+        }
     }
     
     private function afficherStat()
@@ -279,7 +372,7 @@ class Controller
         $resultviande = $resultviande[0][0];
         $resultpoisson = $resultpoisson[0][0];
 
-        $co->executeQuery("select plat.nomPlat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=1 AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme;");
+        $co->executeQuery("select plat.nomplat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=1 AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme;");
         $plats = $co->getResults();
 	require('./src/view/vueStats.php');
      }
@@ -296,8 +389,6 @@ class Controller
     }
 
     private function afficherCartes()
-    {
-           private function afficherCartes()
     {
         $dbInfos = Config::getDataBaseInfos();
 
@@ -366,7 +457,6 @@ class Controller
 		
 
         require("./src/view/cartes.php");
-    }
     }
     
 }

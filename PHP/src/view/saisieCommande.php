@@ -16,7 +16,7 @@
                 <?php
                     foreach($menus as $row)
                     {
-                       echo '<div><input type="number" value="0" min="0" style="width: 5em;" name="menus['.$row['idElement'].']"> - '.$row['nomMenu'].'</div>';
+                       echo '<div><input type="number" value="0" min="0" style="width: 5em;" name="menus['.$row['idelement'].']"> - '.$row['nommenu'].'</div>';
                     }
                 ?>
             </div>
@@ -26,7 +26,7 @@
                 <?php
                     foreach($plats as $row)
                     {
-                       echo '<div><input type="number" value="0" min="0" style="width: 5em;" name="plats['.$row['idElement'].']"> - '.$row['nomPlat'].'</div>';
+                       echo '<div><input type="number" value="0" min="0" style="width: 5em;" name="plats['.$row['idelement'].']"> - '.$row['nomplat'].'</div>';
                     }
                 ?>
             </div>
@@ -36,7 +36,7 @@
                 <?php
                     foreach($boissons as $row)
                     {
-                       echo '<div><input type="number" value="0" min="0" style="width: 5em;" name="boissons['.$row['idElement'].']"> - '.$row['nomBoisson'].'</div>';
+                       echo '<div><input type="number" value="0" min="0" style="width: 5em;" name="boissons['.$row['idelement'].']"> - '.$row['nomboisson'].'</div>';
                     }
                 ?>
             </div>

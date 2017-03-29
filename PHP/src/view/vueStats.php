@@ -36,7 +36,7 @@
                 for($i=0;$i<$iMax;$i++)
                 {
                     $temp = $plats[$i];
-                    echo '<li>'.$temp[0].'  =>  '.$temp[1].'</li>';
+                    echo '<li>'.$temp['nomplat'].'  =>  '.$temp['somme'].'</li>';
                 }
             ?>
             </ul>

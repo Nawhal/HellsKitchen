@@ -1,19 +1,19 @@
 <html lang="fr">
     <head>
         <?php
-            require_once 'header.php';
+            require_once './src/view/header.php';
         ?>
     </head>
     <body>
-	<div>
+        <?php require_once './src/view/menu.php'; ?>
+	    <div>
             <h1>Cartes</h1>
                 <?php
-					var_dump($menus);
-                    /*foreach($res as $key => $val)
+                    foreach($res as $key => $val)
                     {
                         			
-                    }*/
+                    }
                 ?>
-	</div>
+	    </div>
     </body>
 </html>
