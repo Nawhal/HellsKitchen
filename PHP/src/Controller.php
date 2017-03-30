@@ -1,20 +1,5 @@
 <?php
-// Liste des employés : gestion du personnel supprimer /ajouter un gas
-// Ajouter une commande
-/*
-SELECT idElement, quantite, idCommande
-FROM `quantiteELement`
-WHERE idElement IN 
-	(SELECT idElement FROM Plat WHERE dessert=TRUE)
-    
-SELECT idElement, prixElement
-FROM `prixElements`
-WHERE  
 
-(SELECT cartes.idCarte
-FROM cartes, periodesCartes
-WHERE dateDebut<TO_DATE('01-02-2013') AND dateFin>TO_DATE('01-02-2013') AND idRestaurant=1)
- *  */
 
 class Controller
 {
@@ -201,8 +186,8 @@ class Controller
     private function deconnexion()
     {
         session_unset();
-	session_destroy();
-	$_SESSION = array();
+        session_destroy();
+        $_SESSION = array();
     }
     
     private function afficherVueSaisieCommande()
@@ -383,9 +368,9 @@ class Controller
         $resultviande = $resultviande[0][0];
         $resultpoisson = $resultpoisson[0][0];
 
-        $co->executeQuery("select plat.nomplat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=? AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme desc;");
+        $co->executeQuery("SELECT plat.nomplat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=? AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme DESC;", array( 1 => array($_SESSION['idRestau'], PDO::PARAM_INT)));
         $plats = $co->getResults();
-	require('./src/view/vueStats.php');
+	    require('./src/view/vueStats.php');
      }
      
      
