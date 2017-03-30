@@ -1,4 +1,0 @@
-10 Mars: Note de clarification Product Backlog
-17 Mars: MCD et MLD normalisé pour l'ensemble du problème
-24 Mars: Mise en place de la BDD sur PostgreSQL,identification, consulter la liste des restaurants et de leurs cartes pour le client, 
-31 Mars:Le manager pourra entrer des ingrédients, des boissons , des plats, des menus et des cartes. Le serveur à l'acceuil pourra rentrer les commandes du jour. Mise en place des statistiques pour le manager. On ne peut rien modifier on peut juste rajouter de nouveaux objets.
