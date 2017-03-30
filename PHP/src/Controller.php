@@ -372,7 +372,7 @@ class Controller
         $resultviande = $resultviande[0][0];
         $resultpoisson = $resultpoisson[0][0];
 
-        $co->executeQuery("select plat.nomplat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=1 AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme;");
+        $co->executeQuery("select plat.nomplat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=1 AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme desc;");
         $plats = $co->getResults();
 	require('./src/view/vueStats.php');
      }
