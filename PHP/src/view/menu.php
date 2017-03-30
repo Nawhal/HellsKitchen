@@ -6,6 +6,7 @@
         <?php } if(!empty($_SESSION['role']) && $_SESSION['role']=='manager') {?>
                 <button name="action" value="voirStat" type="submit">Statistiques</button>
                 <button name="action" value="voirEmp" type="submit">Gestion du Personnel</button>
+                <button name="action" value="gestionCartes" type="submit">Gestion des Cartes</button>
         <?php } ?>
     </form>
     <?php if(empty($_SESSION['role']) && empty($_SESSION['login'])) { ?>

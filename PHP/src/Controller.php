@@ -1,5 +1,20 @@
 <?php
+// Liste des employés : gestion du personnel supprimer /ajouter un gas
+// Ajouter une commande
+/*
+SELECT idElement, quantite, idCommande
+FROM `quantiteELement`
+WHERE idElement IN 
+	(SELECT idElement FROM Plat WHERE dessert=TRUE)
+    
+SELECT idElement, prixElement
+FROM `prixElements`
+WHERE  
 
+(SELECT cartes.idCarte
+FROM cartes, periodesCartes
+WHERE dateDebut<TO_DATE('01-02-2013') AND dateFin>TO_DATE('01-02-2013') AND idRestaurant=1)
+ *  */
 
 class Controller
 {
@@ -7,7 +22,7 @@ class Controller
     {
         $actionsClient  = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
         $actionsServeur = array('saisirCom', 'enregistrerCom');
-        $actionsManager = array('voirStat', 'voirEmp', 'suppEmp', 'addEmp', 'gestionCartes', 'modifCarte', 'enregistrerCarte', 'suppCarte');
+        $actionsManager = array('voirStat', 'voirEmp', 'suppEmp', 'addEmp', 'gestionCartes', 'addCarte', 'modifCarte', 'enregistrerCarte', 'suppCarte');
         
         session_start();
         
@@ -110,14 +125,19 @@ class Controller
             case 'gestionCartes':
                 $this->gestionCartes();
                 break;
+            case 'addCarte':
+                $this->addCarte();
+                break;
             case 'modifCarte':
                 $this->modifCarte();
                 break;
             case 'suppCarte':
                 $this->suppCarte();
+                $this->gestionCartes();
                 break;
             case 'enregistrerCarte':
                 $this->enregistrerCarte();
+                $this->gestionCartes();
                 break;
             default:
                 //erreur
@@ -270,7 +290,7 @@ class Controller
     {
         if(empty($_GET['id']) || empty($_GET['type']))
         {
-            return;
+            throw new Exception("L'id de l'employé ou son type n'est pas renseigné. Impossible de supprimer.");
         }
         $type = $_GET['type'];
         $id = $_GET['id'];
@@ -296,12 +316,12 @@ class Controller
     {
         if(empty($_GET['nom']) || empty($_GET['prenom']) || empty($_GET['type']) || empty($_GET['datenais']))
         {
-            return;
+            throw new Exception("Tous les champs doivent être renseignés pour pouvoir ajouter un employé.");
         }
         date_default_timezone_set('Europe/Paris');
         $date = DateTime::createFromFormat('d/m/Y', $_GET['datenais']);
         if($date == null)
-            return;
+            throw new Exception("La date de naissance n'est pas correcte.");
         $date = $date->format('Y-m-d');
         $nom = ucfirst(strtolower($_GET['nom']));
         $prenom = ucfirst(strtolower($_GET['prenom']));
@@ -370,7 +390,7 @@ class Controller
 
         $co->executeQuery("SELECT plat.nomplat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=? AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme DESC;", array( 1 => array($_SESSION['idRestau'], PDO::PARAM_INT)));
         $plats = $co->getResults();
-	    require('./src/view/vueStats.php');
+        require('./src/view/vueStats.php');
      }
      
      
@@ -405,23 +425,41 @@ class Controller
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
         
-        $co->executeQuery("SELECT PC.idCarte, nomCarte, dateDebut, dateFin FROM periodeCarte PC, carte C WHERE PC.idRestaurant = ? AND PC.idCarte = C.idCarte ORBER BY dateFin DESC;"
+        $co->executeQuery("SELECT PC.idCarte, nomCarte, dateDebut, dateFin FROM periodeCarte PC, carte C WHERE PC.idRestaurant = ? AND PC.idCarte = C.idCarte ORDER BY dateFin DESC;"
                 , array(1 => array($_SESSION["idRestau"], PDO::PARAM_INT)));
         $cartes = $co->getResults();
         
-        require(Config::getViews()['gestionCartes']);
+        foreach($cartes as $key => $carte)
+        {
+            $pattern = '/(19|20)(\d{2})-(\d{1,2})-(\d{1,2})/';
+            $replacement = '\3/\4/\1\2';
+            $cartes[$key]['datedebut'] = preg_replace($pattern, $replacement, $carte['datedebut']);
+            $cartes[$key]['datefin'] = preg_replace($pattern, $replacement, $carte['datefin']);
+        }
+
+        require("./src/view/gestionCartes.php");
     }
     
+    private function addCarte()
+    {
+        require("./src/view/modifCarte.php");
+    }
+
     private function modifCarte()
     {
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
         
-        $co->executeQuery("SELECT PC.idCarte, nomCarte, dateDebut, dateFin FROM periodeCarte PC, carte C WHERE PC.idCarte = ? AND PC.idCarte = C.idCarte ORBER BY dateFin DESC;"
+        $co->executeQuery("SELECT PC.idCarte, nomCarte, dateDebut, dateFin FROM periodeCarte PC, carte C WHERE PC.idCarte = ? AND PC.idCarte = C.idCarte ORDER BY dateFin DESC;"
                 , array(1 => array($_GET['id'], PDO::PARAM_INT)));
-        $carte = $co->getResults();
-        
-        require(Config::getViews()['modifCarte']);
+        $carte = $co->getResults()[0];
+
+        $pattern = '/(19|20)(\d{2})-(\d{1,2})-(\d{1,2})/';
+        $replacement = '\3/\4/\1\2';
+        $carte['datedebut'] = preg_replace($pattern, $replacement, $carte['datedebut']);
+        $carte['datefin'] = preg_replace($pattern, $replacement, $carte['datefin']);
+
+        require("./src/view/modifCarte.php");
     }
     
     private function suppCarte()
@@ -433,7 +471,9 @@ class Controller
         
         $co->executeQuery("DELETE FROM periodeCarte WHERE idCarte = ?;"
                 , array(1 => array($id, PDO::PARAM_INT)));
-        
+
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+
         $co->executeQuery("DELETE FROM carte WHERE idCarte = ?;"
                 , array(1 => array($id, PDO::PARAM_INT)));
     }
@@ -442,26 +482,52 @@ class Controller
     {
         if(empty($_GET['idCarte']) || empty($_GET['nomCarte']) || empty($_GET['dateDebut']) || empty($_GET['dateFin']))
         {
-            return;
+            throw new Exception("Tous les champs doivent être remplis afin de pouvoir créer une carte.");
         }
         date_default_timezone_set('Europe/Paris');
         $dateDebut = DateTime::createFromFormat('d/m/Y', $_GET['dateDebut']);
         if($dateDebut == null)
-            return;
+            throw new Exception("La date de début n'est pas valide.");
         
         $dateFin = DateTime::createFromFormat('d/m/Y', $_GET['dateFin']);
         if($dateFin == null)
-            return;
+            throw new Exception("La date de fin n'est pas valide.");
         
         $dateDebut = $dateDebut->format('Y-m-d');
         $dateFin = $dateFin->format('Y-m-d');
-        $nomCarte = ucfirst(strtolower($_GET['nomCarte']));
+
+        $nomCarte = $_GET['nomCarte'];
         $idCarte = $_GET['idCarte'];
         
         if($idCarte < 0)
             $this->ajoutCarte ($nomCarte, $dateDebut, $dateFin, $_SESSION['idRestau']);
         else
-            $this->updateCarte ($idCarte, $nomCarte, $dateDebut, $dateFin);
+            $this->updateCarte ($idCarte, $nomCarte, $dateDebut, $dateFin, $_SESSION['idRestau']);
+    }
+
+    private function verifDatesCarte($idCarte, $idRestau, $dateDebut, $dateFin)
+    {
+	$dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+
+	$dateDebutAtt = array($dateDebut, PDO::PARAM_STR);
+	$dateFinAtt = array($dateFin, PDO::PARAM_STR);
+	$co->executeQuery("SELECT COUNT(*) AS nb FROM periodeCarte WHERE "
+		. "idCarte <> ? AND "
+		. "idRestaurant = ? AND "
+		. "((? >= dateDebut AND ? <= dateFin) "
+		. "OR (? >= dateDebut AND ? <= dateFin)"
+		. "OR (? <= dateDebut AND ? >= dateFin));", array(
+            1 => array($idCarte, PDO::PARAM_INT),
+            1 => array($idRestau, PDO::PARAM_INT),
+            3 => $dateFinAtt,
+            4 => $dateFinAtt,
+            5 => $dateDebutAtt,
+            6 => $dateDebutAtt,
+            7 => $dateDebutAtt,
+            8 => $dateFinAtt
+        ));
+	return $co->getResults()[0]['nb'] <= 0;
     }
     
     private function ajoutCarte($nomCarte, $dateDebut, $dateFin, $idRestau)
@@ -470,9 +536,12 @@ class Controller
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
         
         $co->executeQuery("SELECT MAX(idCarte) AS idCarte FROM carte;");
-        $idCarte = $co->getResults()[0]['idCarte'];
+        $idCarte = $co->getResults()[0]['idcarte'];
         if (empty($idCarte)) $idCarte = 0;
         $idCarte++;
+
+        if(! $this->verifDatesCarte($idCarte, $idRestau, $dateDebut, $dateFin))
+            throw new Exception("Deux périodes de deux cartes différentes ne peuvent pas se chevaucher pour un même restaurant.");
         
         $co->executeQuery("INSERT INTO carte(idCarte, nomCarte) VALUES (?,?);", array(
             1 => array($idCarte, PDO::PARAM_INT),
@@ -487,8 +556,11 @@ class Controller
         ));
     }
     
-    private function updateCarte($idCarte, $nomCarte, $dateDebut, $dateFin)
+    private function updateCarte($idCarte, $nomCarte, $dateDebut, $dateFin, $idRestau)
     {
+        if(! $this->verifDatesCarte($idCarte, $idRestau, $dateDebut, $dateFin))
+            throw new Exception("Deux périodes de deux cartes différentes ne peuvent pas se chevaucher pour un même restaurant.");
+
         $dbInfos = Config::getDataBaseInfos();
         $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
         
