@@ -22,7 +22,7 @@ class Controller
     {
         $actionsClient  = array('seConnecter', 'seDeconnecter','sansAction','voirCartes');
         $actionsServeur = array('saisirCom', 'enregistrerCom');
-        $actionsManager = array('voirStat', 'voirEmp', 'suppEmp', 'addEmp');
+        $actionsManager = array('voirStat', 'voirEmp', 'suppEmp', 'addEmp', 'gestionCartes', 'modifCarte', 'enregistrerCarte', 'suppCarte');
         
         session_start();
         
@@ -122,11 +122,22 @@ class Controller
                 $this->addEmploye();
                 $this->listerEmployes();
                 break;
+            case 'gestionCartes':
+                $this->gestionCartes();
+                break;
+            case 'modifCarte':
+                $this->modifCarte();
+                break;
+            case 'suppCarte':
+                $this->suppCarte();
+                break;
+            case 'enregistrerCarte':
+                $this->enregistrerCarte();
+                break;
             default:
                 //erreur
         }
     }
-    
     
     private function isManager()
     {
@@ -404,4 +415,107 @@ class Controller
         require("./src/view/cartes.php");
     }
     
+    private function gestionCartes()
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        
+        $co->executeQuery("SELECT PC.idCarte, nomCarte, dateDebut, dateFin FROM periodeCarte PC, carte C WHERE PC.idRestaurant = ? AND PC.idCarte = C.idCarte ORBER BY dateFin DESC;"
+                , array(1 => array($_SESSION["idRestau"], PDO::PARAM_INT)));
+        $cartes = $co->getResults();
+        
+        require(Config::getViews()['gestionCartes']);
+    }
+    
+    private function modifCarte()
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        
+        $co->executeQuery("SELECT PC.idCarte, nomCarte, dateDebut, dateFin FROM periodeCarte PC, carte C WHERE PC.idCarte = ? AND PC.idCarte = C.idCarte ORBER BY dateFin DESC;"
+                , array(1 => array($_GET['id'], PDO::PARAM_INT)));
+        $carte = $co->getResults();
+        
+        require(Config::getViews()['modifCarte']);
+    }
+    
+    private function suppCarte()
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        
+        $id = $_GET['id'];
+        
+        $co->executeQuery("DELETE FROM periodeCarte WHERE idCarte = ?;"
+                , array(1 => array($id, PDO::PARAM_INT)));
+        
+        $co->executeQuery("DELETE FROM carte WHERE idCarte = ?;"
+                , array(1 => array($id, PDO::PARAM_INT)));
+    }
+    
+    private function enregistrerCarte()
+    {
+        if(empty($_GET['idCarte']) || empty($_GET['nomCarte']) || empty($_GET['dateDebut']) || empty($_GET['dateFin']))
+        {
+            return;
+        }
+        date_default_timezone_set('Europe/Paris');
+        $dateDebut = DateTime::createFromFormat('d/m/Y', $_GET['dateDebut']);
+        if($dateDebut == null)
+            return;
+        
+        $dateFin = DateTime::createFromFormat('d/m/Y', $_GET['dateFin']);
+        if($dateFin == null)
+            return;
+        
+        $dateDebut = $dateDebut->format('Y-m-d');
+        $dateFin = $dateFin->format('Y-m-d');
+        $nomCarte = ucfirst(strtolower($_GET['nomCarte']));
+        $idCarte = $_GET['idCarte'];
+        
+        if($idCarte < 0)
+            $this->ajoutCarte ($nomCarte, $dateDebut, $dateFin, $_SESSION['idRestau']);
+        else
+            $this->updateCarte ($idCarte, $nomCarte, $dateDebut, $dateFin);
+    }
+    
+    private function ajoutCarte($nomCarte, $dateDebut, $dateFin, $idRestau)
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        
+        $co->executeQuery("SELECT MAX(idCarte) AS idCarte FROM carte;");
+        $idCarte = $co->getResults()[0]['idCarte'];
+        if (empty($idCarte)) $idCarte = 0;
+        $idCarte++;
+        
+        $co->executeQuery("INSERT INTO carte(idCarte, nomCarte) VALUES (?,?);", array(
+            1 => array($idCarte, PDO::PARAM_INT),
+            2 => array($nomCarte, PDO::PARAM_STR)
+        ));
+        
+        $co->executeQuery("INSERT INTO periodeCarte(idCarte, idRestaurant, dateDebut, dateFin) VALUES (?,?,?,?);", array(
+            1 => array($idCarte, PDO::PARAM_INT),
+            2 => array($idRestau, PDO::PARAM_INT),
+            3 => array($dateDebut, PDO::PARAM_STR),
+            4 => array($dateFin, PDO::PARAM_STR)
+        ));
+    }
+    
+    private function updateCarte($idCarte, $nomCarte, $dateDebut, $dateFin)
+    {
+        $dbInfos = Config::getDataBaseInfos();
+        $co = new Connection($dbInfos['dbName'], $dbInfos['login'], $dbInfos['mdp']);
+        
+        $co->executeQuery("UPDATE carte SET nomCarte = ? WHERE idCarte = ?;", array(
+            1 => array($nomCarte, PDO::PARAM_STR),
+            2 => array($idCarte, PDO::PARAM_INT)
+        ));
+        
+        $co->executeQuery("UPDATE periodeCarte SET(dateDebut, dateFin) = (?,?) WHERE idCarte = ?;", array(
+            1 => array($dateDebut, PDO::PARAM_STR),
+            2 => array($dateFin, PDO::PARAM_STR),
+            3 => array($idCarte, PDO::PARAM_INT)
+        ));
+    }
 }
