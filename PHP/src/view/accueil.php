@@ -9,12 +9,12 @@
 	<div>
             <h1>Restaurants</h1>
             <ul>
-		<?php
-                    foreach($res as $key => $val)
-                    {
-			echo '<li> <a href=\'?action=voirCartes&id='.$val['idrestaurant'].'\'>'.$val['nomrestaurant'].'</a> a '.$val['ville'].', '.$val['pays'].' - '.$val['adresse'].'</li>';
-                    }
-		?>
+				<?php
+					foreach($res as $key => $val)
+					{
+						echo '<li> <a href=\'?action=voirCartes&id='.$val['idrestaurant'].'\'>'.$val['nomrestaurant'].'</a> a '.$val['ville'].', '.$val['pays'].' - '.$val['adresse'].'</li>';
+					}
+				?>
             </ul>
 	</div>
     </body>

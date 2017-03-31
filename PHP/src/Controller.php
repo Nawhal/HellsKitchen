@@ -1,20 +1,4 @@
 <?php
-// Liste des employés : gestion du personnel supprimer /ajouter un gas
-// Ajouter une commande
-/*
-SELECT idElement, quantite, idCommande
-FROM `quantiteELement`
-WHERE idElement IN 
-	(SELECT idElement FROM Plat WHERE dessert=TRUE)
-    
-SELECT idElement, prixElement
-FROM `prixElements`
-WHERE  
-
-(SELECT cartes.idCarte
-FROM cartes, periodesCartes
-WHERE dateDebut<TO_DATE('01-02-2013') AND dateFin>TO_DATE('01-02-2013') AND idRestaurant=1)
- *  */
 
 class Controller
 {
@@ -25,7 +9,6 @@ class Controller
         $actionsManager = array('voirStat', 'voirEmp', 'suppEmp', 'addEmp', 'gestionCartes', 'addCarte', 'modifCarte', 'enregistrerCarte', 'suppCarte');
         
         session_start();
-        
         try
         {
                 $action = isset($_REQUEST['action']) ? $_REQUEST['action']:'sansAction';
@@ -56,12 +39,14 @@ class Controller
         }
         catch(PDOException $e)
         {
-            echo "<p> <strong>ERREUR BDD : </strong><br>".$e->getMessage()."</p>";
+            $errTitle = 'Erreur BDD';
+			require('./src/view/erreur.php');
             die();
         }
         catch(Exception $e)
         {
-            echo "<p> <strong>Erreur : </strong>".$e->getMessage()."</p>";
+			$errTitle = 'Erreur';
+			require('./src/view/erreur.php');
             die();
         }
     }
@@ -390,6 +375,37 @@ class Controller
 
         $co->executeQuery("SELECT plat.nomplat,SUM(quantiteElement.quantite) AS somme FROM commande,quantiteElement,element,plat WHERE commande.idRestaurant=? AND commande.idCommande=quantiteElement.idCommande AND quantiteElement.idElement=element.idElement AND element.idElement=plat.idElement GROUP BY nomPlat ORDER BY somme DESC;", array( 1 => array($_SESSION['idRestau'], PDO::PARAM_INT)));
         $plats = $co->getResults();
+		
+		$co->executeQuery("SELECT DISTINCT commande.idCommande, (prixElement.prixElement * quantiteElement.quantite) AS total
+							FROM commande, quantiteElement, plat, prixElement, periodeCarte 
+							WHERE
+							   commande.idRestaurant = ? 
+							   AND commande.idCommande = quantiteElement.idCommande 
+							   AND quantiteElement.idElement = plat.idElement 
+							   AND plat.dessert = TRUE 
+							   AND plat.idElement = prixElement.idElement
+							   AND periodeCarte.idrestaurant = ?
+							   AND periodeCarte.dateDebut<=commande.dateCommande
+							   AND periodeCarte.dateFin>=commande.dateCommande
+							   AND prixElement.idCarte = periodeCarte.idCarte
+							ORDER BY commande.idCommande;", array(1 => array($_SESSION['idRestau'], PDO::PARAM_STR), 2 => array($_SESSION['idRestau'], PDO::PARAM_STR)));
+		$result = $co->getResults();
+		$somme = 0;
+		for($i=0; $i<count($result);$i++)
+		{
+			$temp = $result[$i];
+			$somme += $temp['total'];
+		}
+		$co->executeQuery("SELECT COUNT(idcommande) AS nbcommande FROM commande WHERE idrestaurant = ?;", array(1 => array($_SESSION['idRestau'], PDO::PARAM_STR)));
+		$result = $co->getResults();
+		if($result[0]['nbcommande'] == 0)
+		{
+			$moyenneDessert = 0;
+		}
+		else
+		{
+			$moyenneDessert = $somme/$result[0]['nbcommande'];
+		}
         require('./src/view/vueStats.php');
      }
      
@@ -428,15 +444,13 @@ class Controller
         $co->executeQuery("SELECT PC.idCarte, nomCarte, dateDebut, dateFin FROM periodeCarte PC, carte C WHERE PC.idRestaurant = ? AND PC.idCarte = C.idCarte ORDER BY dateFin DESC;"
                 , array(1 => array($_SESSION["idRestau"], PDO::PARAM_INT)));
         $cartes = $co->getResults();
-        
+
+		date_default_timezone_set('Europe/Paris');
         foreach($cartes as $key => $carte)
         {
-            $pattern = '/(19|20)(\d{2})-(\d{1,2})-(\d{1,2})/';
-            $replacement = '\3/\4/\1\2';
-            $cartes[$key]['datedebut'] = preg_replace($pattern, $replacement, $carte['datedebut']);
-            $cartes[$key]['datefin'] = preg_replace($pattern, $replacement, $carte['datefin']);
+			$cartes[$key]['datedebut'] = DateTime::createFromFormat('Y-m-d', $carte['datedebut'])->format('d/m/Y');
+			$cartes[$key]['datefin'] = DateTime::createFromFormat('Y-m-d', $carte['datefin'])->format('d/m/Y');
         }
-
         require("./src/view/gestionCartes.php");
     }
     
@@ -454,10 +468,9 @@ class Controller
                 , array(1 => array($_GET['id'], PDO::PARAM_INT)));
         $carte = $co->getResults()[0];
 
-        $pattern = '/(19|20)(\d{2})-(\d{1,2})-(\d{1,2})/';
-        $replacement = '\3/\4/\1\2';
-        $carte['datedebut'] = preg_replace($pattern, $replacement, $carte['datedebut']);
-        $carte['datefin'] = preg_replace($pattern, $replacement, $carte['datefin']);
+		date_default_timezone_set('Europe/Paris');
+        $carte['datedebut'] = DateTime::createFromFormat('Y-m-d', $carte['datedebut'])->format('d/m/Y');
+        $carte['datefin'] = DateTime::createFromFormat('Y-m-d', $carte['datefin'])->format('d/m/Y');
 
         require("./src/view/modifCarte.php");
     }
@@ -519,7 +532,7 @@ class Controller
 		. "OR (? >= dateDebut AND ? <= dateFin)"
 		. "OR (? <= dateDebut AND ? >= dateFin));", array(
             1 => array($idCarte, PDO::PARAM_INT),
-            1 => array($idRestau, PDO::PARAM_INT),
+            2 => array($idRestau, PDO::PARAM_INT),
             3 => $dateFinAtt,
             4 => $dateFinAtt,
             5 => $dateDebutAtt,

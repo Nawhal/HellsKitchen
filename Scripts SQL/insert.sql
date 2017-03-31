@@ -14,14 +14,18 @@ INSERT INTO manager(idEmploye, nom, prenom, dateNaissance, dateAnciennete, idRes
 (6, 'Mégalo', 'Paul', '1994-12-18', '2016-01-07', 2);
 
 INSERT INTO serveur(idEmploye, nom, prenom, dateNaissance, dateAnciennete, authorisationAccueil, idRestaurant) VALUES
-(4, 'Sclave', 'Ashley', '1998-03-15', '2014-01-09', TRUE, 2);
+(4, 'Sclave', 'Ashley', '1998-03-15', '2014-01-09', TRUE, 2),
+(9, 'Kan', 'Jerry', '1993-05-25', '2015-05-02', TRUE, 1);
 
 INSERT INTO carte(idCarte, nomCarte) VALUES
 (1, 'Carte de Printemps'),
 (2, 'Carte des Burgers'),
 (3, 'Carte Maestro');
 
-INSERT INTO commande(idCommande, idRestaurant, dateCommande) VALUES (1, 1, '2016-04-12');
+INSERT INTO commande(idCommande, idRestaurant, dateCommande) VALUES
+(1, 1, '2016-04-12'),
+(2, 2, '2017-03-30'),
+(3, 2, '2017-03-30');
 
 INSERT INTO element(idElement) VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19),(20),(21),(22),(23),(24);
 
@@ -70,13 +74,17 @@ INSERT INTO ingredient(nomIngredient, liquide) VALUES
 ('Sauce Soja', TRUE);
 
 INSERT INTO periodeCarte (idCarte, idRestaurant, dateDebut, dateFin) VALUES
-(1,2,'2016-11-14','2017-01-14'),
-(2,1,'2016-11-14','2017-01-14'),
-(3,2,'2017-01-14','2017-11-14');
+(1,2,'2016-11-14','2017-05-14'),
+(2,1,'2016-11-14','2017-05-14'),
+(3,2,'2017-05-15','2017-08-14');
 
 INSERT INTO quantiteElement (idElement, idCommande, idRestaurant, quantite) VALUES
 (1,1,1,2),
-(2,1,1,3);
+(2,1,1,3),
+(10,2,2,1),
+(11,2,2,1),
+(1,3,2,2),
+(10,3,2,8);
 
 INSERT INTO prixElement (idElement, idCarte, prixElement) VALUES
 (1,1,15.50),

@@ -6,7 +6,7 @@
     </head>
     <body>
         <?php require_once './src/view/menu.php'; ?>
-        <h1>Statistiques</h1>
+        <h1>Statistiques (pour votre restaurant)</h1>
         <div>
             <?php
                 if($resultviande==$resultpoisson)
@@ -40,6 +40,12 @@
                 }
             ?>
             </ul>
+        </div>
+		<br>
+		<div>
+            <p>Somme moyenne dépensée sur les desserts pour chaque commande :<strong>
+			<?php echo $moyenneDessert;?> €</strong> (sur <?php echo $result[0]['nbcommande']?> commandes)
+			</p>
         </div>
     </body>
 </html>
